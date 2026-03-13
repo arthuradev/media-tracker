@@ -4,7 +4,7 @@ This project now ships with a Windows-first release path for `Media Tracker`.
 
 ## Versioning
 
-- The application version lives in [MediaTracker.csproj](/C:/Users/Arthur/Dev/Projetos/Codex/src/MediaTracker/MediaTracker.csproj).
+- The application version lives in [MediaTracker.csproj](../src/MediaTracker/MediaTracker.csproj).
 - Update `<Version>`, `<AssemblyVersion>`, `<FileVersion>` and `<InformationalVersion>` before cutting a release.
 
 ## Release artifacts
@@ -21,7 +21,7 @@ All generated outputs go under `artifacts/`, which is already ignored by git.
 
 ## Publish profile
 
-The app uses [Release-WinX64.pubxml](/C:/Users/Arthur/Dev/Projetos/Codex/src/MediaTracker/Properties/PublishProfiles/Release-WinX64.pubxml) for the default desktop release:
+The app uses [Release-WinX64.pubxml](../src/MediaTracker/Properties/PublishProfiles/Release-WinX64.pubxml) for the default desktop release:
 
 - `Release`
 - `win-x64`
@@ -47,7 +47,7 @@ Optional flags:
 
 ## Installer
 
-The installer script lives at [MediaTracker.iss](/C:/Users/Arthur/Dev/Projetos/Codex/installer/MediaTracker.iss).
+The installer script lives at [MediaTracker.iss](../installer/MediaTracker.iss).
 
 It installs per-user to:
 
