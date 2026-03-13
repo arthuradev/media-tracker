@@ -57,6 +57,9 @@ public partial class SettingsViewModel : ObservableObject
         _updateFeedUrl = settings.UpdateFeedUrl;
         _checkForUpdatesOnStartup = settings.CheckForUpdatesOnStartup;
         CurrentVersion = appUpdateService.CurrentVersion;
+
+        if (settings.HasUnreadableSecrets)
+            ErrorMessage = "Some saved API keys could not be read. Add them again and save to protect them.";
     }
 
     [RelayCommand]

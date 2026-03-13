@@ -18,6 +18,7 @@ public partial class MainViewModel : ObservableObject
     private readonly ImageCacheService _imageCache;
     private readonly AppSettings _settings;
     private readonly AppUpdateService _appUpdateService;
+    private readonly Action? _openManualAddOverride;
 
     private CancellationTokenSource? _inlineSearchCts;
     private readonly DispatcherTimer _debounceTimer;
@@ -88,13 +89,16 @@ public partial class MainViewModel : ObservableObject
         IEnumerable<IMetadataProvider> providers,
         ImageCacheService imageCache,
         AppSettings settings,
-        AppUpdateService appUpdateService)
+        AppUpdateService appUpdateService,
+        Action? openManualAddOverride = null,
+        bool initializeShell = true)
     {
         _mediaService = mediaService;
         _providers = providers;
         _imageCache = imageCache;
         _settings = settings;
         _appUpdateService = appUpdateService;
+        _openManualAddOverride = openManualAddOverride;
 
         _debounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
         _debounceTimer.Tick += (_, _) =>
@@ -103,7 +107,10 @@ public partial class MainViewModel : ObservableObject
             _ = RunInlineSearchAsync();
         };
 
-        NavigateTo("Home");
+        if (initializeShell)
+            NavigateTo("Home");
+        else
+            UpdateShellState(CurrentSection);
 
         if (_settings.CheckForUpdatesOnStartup && !string.IsNullOrWhiteSpace(_settings.UpdateFeedUrl))
             _ = CheckForUpdatesOnStartupAsync();
@@ -431,6 +438,12 @@ public partial class MainViewModel : ObservableObject
 
     private void OpenManualAddDialog()
     {
+        if (_openManualAddOverride is not null)
+        {
+            _openManualAddOverride();
+            return;
+        }
+
         var window = new AddEditMediaWindow { Owner = Application.Current.MainWindow };
 
         var vm = new AddEditMediaViewModel(
