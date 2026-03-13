@@ -1,0 +1,143 @@
+<UserControl x:Class="MediaTracker.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:conv="clr-namespace:MediaTracker.Converters"
+             xmlns:vm="clr-namespace:MediaTracker.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:SettingsViewModel}">
+
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:NullToVisibilityConverter x:Key="NullToVis"/>
+
+        <Style x:Key="SettingsLabel" TargetType="TextBlock" BasedOn="{StaticResource CaptionText}">
+            <Setter Property="Margin" Value="0,16,0,6"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="760">
+            <Border Style="{StaticResource ElevatedCard}" Padding="28" Margin="0,0,0,18">
+                <StackPanel>
+                    <TextBlock Text="API SETUP" Style="{StaticResource PageEyebrowText}"/>
+                    <TextBlock Text="Connect metadata providers"
+                               Style="{StaticResource PageTitleText}"
+                               FontSize="{StaticResource FontSizeLarge}"
+                               Margin="0,12,0,0"/>
+                    <TextBlock Text="Add your personal API keys so the app can search and enrich titles while keeping the local library fully yours."
+                               Style="{StaticResource BodyText}"
+                               Margin="0,12,0,0"
+                               TextWrapping="Wrap"/>
+
+                    <Border Style="{StaticResource ErrorBanner}"
+                            Margin="0,18,0,0"
+                            Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVis}}">
+                        <TextBlock Text="{Binding ErrorMessage}"
+                                   Style="{StaticResource BannerText}"
+                                   Foreground="{StaticResource DangerBrush}"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+
+                    <Border Style="{StaticResource SuccessBanner}"
+                            Margin="0,18,0,0"
+                            Visibility="{Binding StatusMessage, Converter={StaticResource NullToVis}}">
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Style="{StaticResource BannerText}"
+                                   Foreground="{StaticResource SuccessBrush}"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+
+                    <TextBlock Text="TMDB API key" Style="{StaticResource SettingsLabel}" Margin="0,22,0,6"/>
+                    <TextBox Text="{Binding TmdbApiKey, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource InputTextBox}"/>
+                    <TextBlock Text="Used for movies, series and anime."
+                               Style="{StaticResource CaptionText}"
+                               Margin="0,6,0,0"/>
+
+                    <TextBlock Text="RAWG API key" Style="{StaticResource SettingsLabel}" Margin="0,18,0,6"/>
+                    <TextBox Text="{Binding RawgApiKey, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource InputTextBox}"/>
+                    <TextBlock Text="Used for games."
+                               Style="{StaticResource CaptionText}"
+                               Margin="0,6,0,0"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                        <Button Content="Save Settings"
+                                Command="{Binding SaveCommand}"
+                                Style="{StaticResource AccentButton}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource ElevatedCard}" Padding="28">
+                <StackPanel>
+                    <TextBlock Text="APP UPDATES" Style="{StaticResource PageEyebrowText}"/>
+                    <TextBlock Text="Check for newer releases"
+                               Style="{StaticResource PageTitleText}"
+                               FontSize="{StaticResource FontSizeLarge}"
+                               Margin="0,12,0,0"/>
+                    <TextBlock Text="Use a simple JSON feed to warn you when a newer build is available. This keeps updates lightweight while still giving you a heads-up inside the app."
+                               Style="{StaticResource BodyText}"
+                               Margin="0,12,0,0"
+                               TextWrapping="Wrap"/>
+
+                    <TextBlock Text="Current version" Style="{StaticResource SettingsLabel}" Margin="0,22,0,6"/>
+                    <Border Style="{StaticResource SurfaceCard}" Padding="14,12">
+                        <TextBlock Text="{Binding CurrentVersion}"
+                                   Style="{StaticResource BodyText}"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </Border>
+
+                    <TextBlock Text="Update feed URL" Style="{StaticResource SettingsLabel}" Margin="0,18,0,6"/>
+                    <TextBox Text="{Binding UpdateFeedUrl, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource InputTextBox}"/>
+                    <TextBlock Text="Use an absolute HTTPS URL or a local manifest file path while testing."
+                               Style="{StaticResource CaptionText}"
+                               Margin="0,6,0,0"/>
+
+                    <CheckBox IsChecked="{Binding CheckForUpdatesOnStartup}"
+                              Margin="0,18,0,0">
+                        <TextBlock Text="Check for updates on startup"
+                                   Style="{StaticResource BodyText}"
+                                   VerticalAlignment="Center"/>
+                    </CheckBox>
+
+                    <Border Style="{StaticResource ErrorBanner}"
+                            Margin="0,18,0,0"
+                            Visibility="{Binding UpdateErrorMessage, Converter={StaticResource NullToVis}}">
+                        <TextBlock Text="{Binding UpdateErrorMessage}"
+                                   Style="{StaticResource BannerText}"
+                                   Foreground="{StaticResource DangerBrush}"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+
+                    <Border Style="{StaticResource SuccessBanner}"
+                            Margin="0,18,0,0"
+                            Visibility="{Binding UpdateStatusMessage, Converter={StaticResource NullToVis}}">
+                        <TextBlock Text="{Binding UpdateStatusMessage}"
+                                   Style="{StaticResource BannerText}"
+                                   Foreground="{StaticResource SuccessBrush}"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                        <Button Content="Check Now"
+                                Command="{Binding CheckForUpdatesCommand}"
+                                Style="{StaticResource AccentButton}"/>
+                        <Button Content="Open Download"
+                                Command="{Binding OpenLatestDownloadCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                Margin="12,0,0,0"/>
+                        <TextBlock Text="Checking the latest feed..."
+                                   Style="{StaticResource CaptionText}"
+                                   Margin="14,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding IsCheckingForUpdates, Converter={StaticResource BoolToVis}}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

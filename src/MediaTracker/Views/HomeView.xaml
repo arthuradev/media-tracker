@@ -1,0 +1,86 @@
+<UserControl x:Class="MediaTracker.Views.HomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MediaTracker.ViewModels"
+             mc:Ignorable="d"
+             xmlns:conv="clr-namespace:MediaTracker.Converters"
+             d:DataContext="{d:DesignInstance vm:HomeViewModel}">
+
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <!--
+        HomeView — Monkeytype-inspired landing.
+        Vertically centred, typographic, contemplative.
+        No cards. No borders. Just text and space.
+    -->
+
+    <Grid>
+        <!-- Centre the content block vertically in the viewport -->
+        <StackPanel VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    MaxWidth="640"
+                    Margin="0,0,0,48">
+
+            <!-- Hero title — large monospace, lowercase -->
+            <TextBlock Text="media tracker"
+                       Style="{StaticResource HeroText}"
+                       Foreground="{StaticResource TextPrimaryBrush}"/>
+
+            <!-- Tagline — secondary colour, sans-serif -->
+            <TextBlock Text="a calm space for everything you watch and play."
+                       Style="{StaticResource BodyText}"
+                       Margin="0,12,0,0"
+                       FontSize="15"/>
+
+            <!-- Library stats — monospace counters, subtle -->
+            <TextBlock Style="{StaticResource StatText}"
+                       Margin="0,32,0,0"
+                       Visibility="{Binding HasItems, Converter={StaticResource BoolToVis}}">
+                <Run Text="{Binding MovieCount, Mode=OneWay}"/>
+                <Run Text="movies" Foreground="{StaticResource TextMutedBrush}"/>
+                <Run Text="  ·  " Foreground="{StaticResource TextMutedBrush}"/>
+                <Run Text="{Binding SeriesCount, Mode=OneWay}"/>
+                <Run Text="series" Foreground="{StaticResource TextMutedBrush}"/>
+                <Run Text="  ·  " Foreground="{StaticResource TextMutedBrush}"/>
+                <Run Text="{Binding AnimeCount, Mode=OneWay}"/>
+                <Run Text="anime" Foreground="{StaticResource TextMutedBrush}"/>
+                <Run Text="  ·  " Foreground="{StaticResource TextMutedBrush}"/>
+                <Run Text="{Binding GameCount, Mode=OneWay}"/>
+                <Run Text="games" Foreground="{StaticResource TextMutedBrush}"/>
+            </TextBlock>
+
+            <!-- Empty state — shown when library is empty -->
+            <TextBlock Text="your library is empty. add something to get started."
+                       Style="{StaticResource CaptionText}"
+                       Margin="0,32,0,0"
+                       Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}"/>
+
+            <!-- Primary action — small accent button, lots of top spacing -->
+            <StackPanel Orientation="Horizontal" Margin="0,40,0,0">
+                <Button Content="+ add media"
+                        Style="{StaticResource AccentButton}"
+                        Command="{Binding AddMediaCommand}"/>
+
+                <Button Content="open library"
+                        Style="{StaticResource GhostButton}"
+                        Command="{Binding OpenLibraryCommand}"
+                        Margin="12,0,0,0"/>
+            </StackPanel>
+
+            <!-- Hint row — ultra-subtle navigation shortcuts -->
+            <StackPanel Orientation="Horizontal" Margin="0,48,0,0">
+                <TextBlock Style="{StaticResource CaptionText}">
+                    <Run Text="quick capture" Foreground="{StaticResource TextMutedBrush}"/>
+                    <Run Text="  ·  "/>
+                    <Run Text="readable progress" Foreground="{StaticResource TextMutedBrush}"/>
+                    <Run Text="  ·  "/>
+                    <Run Text="local by default" Foreground="{StaticResource TextMutedBrush}"/>
+                </TextBlock>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

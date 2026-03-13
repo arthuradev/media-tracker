@@ -1,0 +1,266 @@
+<Window x:Class="MediaTracker.Views.SearchExternalWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:conv="clr-namespace:MediaTracker.Converters"
+        xmlns:vm="clr-namespace:MediaTracker.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance vm:SearchExternalViewModel}"
+        Title="Search and Import"
+        Height="720"
+        Width="820"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <conv:NullToVisibilityConverter x:Key="NullToVis"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:MediaTypeDisplayConverter x:Key="TypeDisplay"/>
+
+        <x:Array Type="{x:Type sys:Int32}" x:Key="SkeletonRows">
+            <sys:Int32>1</sys:Int32>
+            <sys:Int32>2</sys:Int32>
+            <sys:Int32>3</sys:Int32>
+            <sys:Int32>4</sys:Int32>
+            <sys:Int32>5</sys:Int32>
+        </x:Array>
+    </Window.Resources>
+
+    <Grid Background="{StaticResource BackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{StaticResource BackgroundDarkBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="24,20">
+            <StackPanel>
+                <TextBlock Text="Search and import"
+                           Style="{StaticResource PageTitleText}"
+                           FontSize="{StaticResource FontSizeLarge}"/>
+                <TextBlock Text="Look up a title first. If nothing fits, switch straight to manual entry without leaving the flow."
+                           Style="{StaticResource BodyText}"
+                           Margin="0,8,0,0"
+                           TextWrapping="Wrap"/>
+
+                <Grid Margin="0,18,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ComboBox Grid.Column="0"
+                              ItemsSource="{Binding MediaTypes}"
+                              SelectedItem="{Binding SelectedType}"
+                              Style="{StaticResource InputComboBox}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource TypeDisplay}}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <TextBox Grid.Column="2"
+                             Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource SearchBox}">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding SearchCommand}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
+
+                    <Button Grid.Column="4"
+                            Content="Search"
+                            Command="{Binding SearchCommand}"
+                            Style="{StaticResource AccentButton}"/>
+                </Grid>
+
+                <TextBlock Text="{Binding ErrorMessage}"
+                           Foreground="{StaticResource DangerBrush}"
+                           Style="{StaticResource BodyText}"
+                           Margin="0,10,0,0"
+                           Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVis}}"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          Visibility="{Binding IsSearching, Converter={StaticResource BoolToVis}}">
+                <ItemsControl ItemsSource="{StaticResource SkeletonRows}" Margin="24,18">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource SurfaceCard}" Padding="16" Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="62"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="90"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Style="{StaticResource SkeletonBlock}" Height="88" Width="62"/>
+                                    <StackPanel Grid.Column="2">
+                                        <Border Style="{StaticResource SkeletonBlock}" Height="18" Width="220" Margin="0,0,0,10"/>
+                                        <Border Style="{StaticResource SkeletonBlock}" Height="12" Width="140" Margin="0,0,0,10"/>
+                                        <Border Style="{StaticResource SkeletonBlock}" Height="12" Width="420"/>
+                                    </StackPanel>
+                                    <Border Grid.Column="3" Style="{StaticResource SkeletonBlock}" Height="34" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <Border Style="{StaticResource ElevatedCard}"
+                    Padding="28"
+                    MaxWidth="520"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding ShowEmptyState, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <TextBlock Text="No results this time"
+                               Style="{StaticResource SectionTitleText}"
+                               FontSize="{StaticResource FontSizeLarge}"/>
+                    <TextBlock Text="Try a broader title, switch media type or add it manually and refine the details later."
+                               Style="{StaticResource BodyText}"
+                               Margin="0,10,0,0"
+                               TextWrapping="Wrap"/>
+                    <Button Content="Add Manually Instead"
+                            Command="{Binding ManualAddCommand}"
+                            Style="{StaticResource AccentButton}"
+                            Margin="0,22,0,0"
+                            HorizontalAlignment="Left"/>
+                </StackPanel>
+            </Border>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          Visibility="{Binding IsSearching, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                <ItemsControl ItemsSource="{Binding Results}" Margin="24,18,24,24">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding DataContext.ImportCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Padding="0"
+                                    Margin="0,0,0,12"
+                                    Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="RowCard"
+                                                Style="{StaticResource SurfaceCard}"
+                                                Padding="16">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="66"/>
+                                                    <ColumnDefinition Width="16"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <Border Grid.Column="0"
+                                                        Style="{StaticResource SurfaceCard}"
+                                                        Background="{StaticResource SurfaceRaisedBrush}"
+                                                        Height="92"
+                                                        Width="66"
+                                                        ClipToBounds="True">
+                                                    <Grid>
+                                                        <TextBlock Text="No cover"
+                                                                   Style="{StaticResource CaptionText}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   Visibility="{Binding CoverImageUrl, Converter={StaticResource NullToVis}, ConverterParameter=invert}"/>
+                                                        <Image Source="{Binding CoverImageUrl}"
+                                                               Stretch="UniformToFill"
+                                                               Visibility="{Binding CoverImageUrl, Converter={StaticResource NullToVis}}"/>
+                                                    </Grid>
+                                                </Border>
+
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="{Binding Title}"
+                                                               Style="{StaticResource SectionTitleText}"
+                                                               FontSize="15"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Style="{StaticResource CaptionText}" Margin="0,6,0,0">
+                                                        <Run Text="{Binding ReleaseYear}"/>
+                                                        <Run Text="  "/>
+                                                        <Run Text="{Binding Genres}"/>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding Synopsis}"
+                                                               Style="{StaticResource BodyText}"
+                                                               Margin="0,8,0,0"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               MaxHeight="40"/>
+                                                </StackPanel>
+
+                                                <Border Grid.Column="3"
+                                                        Background="{StaticResource AccentSoftBrush}"
+                                                        CornerRadius="10"
+                                                        Padding="14,8"
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="Import"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{StaticResource AccentHoverBrush}"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="RowCard" Property="Background" Value="{StaticResource SurfaceLightBrush}"/>
+                                                <Setter TargetName="RowCard" Property="BorderBrush" Value="{StaticResource BorderStrongBrush}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <Border Background="{StaticResource OverlayBrush}"
+                    Visibility="{Binding IsImporting, Converter={StaticResource BoolToVis}}">
+                <Border Style="{StaticResource ElevatedCard}"
+                        Padding="24"
+                        MaxWidth="320"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock Text="Importing title"
+                                   Style="{StaticResource SectionTitleText}"/>
+                        <TextBlock Text="Saving metadata, cache and provider mapping."
+                                   Style="{StaticResource BodyText}"
+                                   Margin="0,8,0,0"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2"
+                Background="{StaticResource BackgroundDarkBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="24,16">
+            <DockPanel>
+                <Button Content="Add Manually Instead"
+                        Command="{Binding ManualAddCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        DockPanel.Dock="Left"/>
+                <Button Content="Cancel"
+                        Command="{Binding CancelCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        DockPanel.Dock="Right"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

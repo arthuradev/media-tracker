@@ -1,0 +1,196 @@
+<Window x:Class="MediaTracker.Views.AddEditMediaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:conv="clr-namespace:MediaTracker.Converters"
+        xmlns:vm="clr-namespace:MediaTracker.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance vm:AddEditMediaViewModel}"
+        Title="{Binding WindowTitle}"
+        Height="700"
+        Width="620"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <conv:NullToVisibilityConverter x:Key="NullToVis"/>
+        <conv:MediaTypeDisplayConverter x:Key="TypeDisplay"/>
+        <conv:MediaStatusDisplayConverter x:Key="StatusDisplay"/>
+
+        <Style x:Key="FormLabel" TargetType="TextBlock" BasedOn="{StaticResource CaptionText}">
+            <Setter Property="Margin" Value="0,16,0,6"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="{StaticResource BackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{StaticResource BackgroundDarkBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="24,20">
+            <StackPanel>
+                <TextBlock Text="{Binding WindowTitle}"
+                           Style="{StaticResource PageTitleText}"
+                           FontSize="{StaticResource FontSizeLarge}"/>
+                <TextBlock Text="Keep the details clean now so the library stays easy to browse later."
+                           Style="{StaticResource BodyText}"
+                           Margin="0,8,0,0"
+                           TextWrapping="Wrap"/>
+
+                <Border Style="{StaticResource ErrorBanner}"
+                        Margin="0,16,0,0"
+                        Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVis}}">
+                    <TextBlock Text="{Binding ErrorMessage}"
+                               Style="{StaticResource BannerText}"
+                               Foreground="{StaticResource DangerBrush}"
+                               TextWrapping="Wrap"/>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,18,24,18">
+            <StackPanel>
+                <Border Style="{StaticResource SurfaceCard}" Padding="22">
+                    <StackPanel>
+                        <TextBlock Text="Title *" Style="{StaticResource FormLabel}" Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBox}"/>
+
+                        <TextBlock Text="Original title" Style="{StaticResource FormLabel}"/>
+                        <TextBox Text="{Binding OriginalTitle, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBox}"/>
+
+                        <Grid Margin="0,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Media type" Style="{StaticResource FormLabel}"/>
+                                <ComboBox ItemsSource="{Binding MediaTypes}"
+                                          SelectedItem="{Binding MediaType}"
+                                          Style="{StaticResource InputComboBox}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Converter={StaticResource TypeDisplay}}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Status" Style="{StaticResource FormLabel}"/>
+                                <ComboBox ItemsSource="{Binding MediaStatuses}"
+                                          SelectedItem="{Binding Status}"
+                                          Style="{StaticResource InputComboBox}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Converter={StaticResource StatusDisplay}}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Release year" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding ReleaseYear, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource InputTextBox}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Your rating" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding UserScore, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource InputTextBox}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Seasons" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding TotalSeasons, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource InputTextBox}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Episodes" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding TotalEpisodes, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource InputTextBox}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="Runtime (min)" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding RuntimeMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource InputTextBox}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="Genres" Style="{StaticResource FormLabel}"/>
+                        <TextBox Text="{Binding Genres, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBox}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SurfaceCard}" Padding="22" Margin="0,18,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Synopsis" Style="{StaticResource FormLabel}" Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding Synopsis, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBox}"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 Height="120"
+                                 VerticalContentAlignment="Top"/>
+
+                        <TextBlock Text="Your review" Style="{StaticResource FormLabel}"/>
+                        <TextBox Text="{Binding UserReview, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBox}"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 Height="100"
+                                 VerticalContentAlignment="Top"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2"
+                Background="{StaticResource BackgroundDarkBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="24,16">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel"
+                        Command="{Binding CancelCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        Margin="0,0,12,0"/>
+                <Button Content="Save"
+                        Command="{Binding SaveCommand}"
+                        Style="{StaticResource AccentButton}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

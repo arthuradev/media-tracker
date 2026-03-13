@@ -1,0 +1,45 @@
+<UserControl x:Class="MediaTracker.Views.PlaceholderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:conv="clr-namespace:MediaTracker.Converters"
+             xmlns:vm="clr-namespace:MediaTracker.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:PlaceholderViewModel}">
+
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Border Style="{StaticResource ElevatedCard}"
+                MaxWidth="760"
+                Padding="34"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <StackPanel>
+                <TextBlock Text="{Binding Eyebrow}" Style="{StaticResource PageEyebrowText}"/>
+                <TextBlock Text="{Binding Title}"
+                           Style="{StaticResource PageTitleText}"
+                           Margin="0,12,0,0"
+                           TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding Description}"
+                           Style="{StaticResource BodyText}"
+                           Margin="0,12,0,0"
+                           TextWrapping="Wrap"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                    <Button Content="{Binding PrimaryActionText}"
+                            Style="{StaticResource AccentButton}"
+                            Command="{Binding PrimaryActionCommand}"
+                            Margin="0,0,12,0"/>
+                    <Button Content="{Binding SecondaryActionText}"
+                            Style="{StaticResource SecondaryButton}"
+                            Visibility="{Binding HasSecondaryAction, Converter={StaticResource BoolToVis}}"
+                            Command="{Binding SecondaryActionCommand}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
