@@ -64,6 +64,9 @@ public partial class MainViewModel : ObservableObject
     private ObservableCollection<SearchResult> _inlineResults = [];
 
     [ObservableProperty]
+    private SearchResult? _selectedInlineResult;
+
+    [ObservableProperty]
     private bool _isInlineSearching;
 
     [ObservableProperty]
@@ -203,6 +206,7 @@ public partial class MainViewModel : ObservableObject
         {
             _inlineSearchCts?.Cancel();
             InlineResults = [];
+            SelectedInlineResult = null;
             ShowInlineResults = false;
             ShowInlineEmpty = false;
             InlineError = null;
@@ -254,6 +258,7 @@ public partial class MainViewModel : ObservableObject
                 .ToList();
 
             InlineResults = new ObservableCollection<SearchResult>(limited);
+            SelectedInlineResult = limited.FirstOrDefault();
             ShowInlineEmpty = limited.Count == 0;
         }
         catch (OperationCanceledException) { }
@@ -261,6 +266,7 @@ public partial class MainViewModel : ObservableObject
         {
             InlineError = "search failed.";
             InlineResults = [];
+            SelectedInlineResult = null;
             ShowInlineEmpty = false;
         }
         finally
@@ -276,10 +282,42 @@ public partial class MainViewModel : ObservableObject
         _inlineSearchCts?.Cancel();
         InlineSearchQuery = string.Empty;
         InlineResults = [];
+        SelectedInlineResult = null;
         IsInlineSearching = false;
         ShowInlineResults = false;
         ShowInlineEmpty = false;
         InlineError = null;
+    }
+
+    public void MoveInlineSelection(int offset)
+    {
+        if (InlineResults.Count == 0)
+        {
+            SelectedInlineResult = null;
+            return;
+        }
+
+        var currentIndex = SelectedInlineResult is null
+            ? -1
+            : InlineResults.IndexOf(SelectedInlineResult);
+
+        int nextIndex = currentIndex switch
+        {
+            < 0 when offset >= 0 => 0,
+            < 0 => InlineResults.Count - 1,
+            _ => Math.Clamp(currentIndex + offset, 0, InlineResults.Count - 1)
+        };
+
+        SelectedInlineResult = InlineResults[nextIndex];
+    }
+
+    public bool TryImportSelectedInlineResult()
+    {
+        if (SelectedInlineResult is null || IsInlineImporting)
+            return false;
+
+        InlineImportCommand.Execute(SelectedInlineResult);
+        return true;
     }
 
     // ── Navigation ───────────────────────────────────────────

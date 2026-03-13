@@ -3,9 +3,9 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!--
-        MONKEY DARK — Media Tracker
-        Inspired by Monkeytype's contemplative, typographic aesthetic.
-        Neutral charcoal palette · warm off-white text · single accent.
+        VAULT — Media Tracker
+        Inspired by Raycast's precision and density.
+        Near-black surfaces · violet accent · semantic status colours.
         Swap this file for a different palette to re-theme the entire app.
     -->
 
@@ -13,35 +13,58 @@
     <!-- PALETTE — raw colours (never reference these directly)     -->
     <!-- ═══════════════════════════════════════════════════════════ -->
 
-    <Color x:Key="BackgroundDarkColor">#1a1a1e</Color>
-    <Color x:Key="BackgroundColor">#232326</Color>
-    <Color x:Key="SurfaceColor">#2c2c30</Color>
-    <Color x:Key="SurfaceLightColor">#343438</Color>
-    <Color x:Key="SurfaceRaisedColor">#3c3c41</Color>
+    <!-- Surfaces — differentiated by luminosity delta -->
+    <Color x:Key="BackgroundDarkColor">#09090B</Color>       <!-- bg-base -->
+    <Color x:Key="SidebarColor">#0D0D0F</Color>              <!-- sidebar recedes -->
+    <Color x:Key="BackgroundColor">#111113</Color>            <!-- surface-1 -->
+    <Color x:Key="SurfaceColor">#161618</Color>               <!-- surface-2 -->
+    <Color x:Key="SurfaceLightColor">#1C1C1E</Color>          <!-- elevated -->
+    <Color x:Key="SurfaceRaisedColor">#242427</Color>         <!-- raised controls -->
 
-    <Color x:Key="BorderColor">#3c3c41</Color>
-    <Color x:Key="BorderStrongColor">#505057</Color>
+    <!-- Borders -->
+    <Color x:Key="BorderColor">#12FFFFFF</Color>              <!-- rgba(255,255,255,0.07) -->
+    <Color x:Key="BorderStrongColor">#1EFFFFFF</Color>        <!-- rgba(255,255,255,0.12) -->
+    <Color x:Key="BorderFocusColor">#997C5CF6</Color>         <!-- rgba(124,92,246,0.6) -->
 
-    <Color x:Key="TextPrimaryColor">#d1d0c5</Color>
-    <Color x:Key="TextSecondaryColor">#646669</Color>
-    <Color x:Key="TextMutedColor">#444449</Color>
+    <!-- Text — three-layer hierarchy -->
+    <Color x:Key="TextPrimaryColor">#FFFFFF</Color>
+    <Color x:Key="TextSecondaryColor">#A1A1AA</Color>
+    <Color x:Key="TextTertiaryColor">#71717A</Color>
+    <Color x:Key="TextMutedColor">#3F3F46</Color>
 
-    <Color x:Key="AccentColor">#e2b714</Color>
-    <Color x:Key="AccentHoverColor">#ebc934</Color>
-    <Color x:Key="AccentSoftColor">#2a2510</Color>
+    <!-- Accent — violet -->
+    <Color x:Key="AccentColor">#7C5CF6</Color>
+    <Color x:Key="AccentHoverColor">#9171F8</Color>
+    <Color x:Key="AccentSoftColor">#267C5CF6</Color>          <!-- rgba(124,92,246,0.15) -->
 
-    <Color x:Key="SuccessColor">#7ec984</Color>
-    <Color x:Key="WarningColor">#e7c468</Color>
-    <Color x:Key="DangerColor">#ca4754</Color>
+    <!-- Status — semantic -->
+    <Color x:Key="StatusWantColor">#6B7280</Color>
+    <Color x:Key="StatusWatchingColor">#3B82F6</Color>
+    <Color x:Key="StatusDoneColor">#22C55E</Color>
+    <Color x:Key="StatusPausedColor">#F59E0B</Color>
+    <Color x:Key="StatusDroppedColor">#EF4444</Color>
 
-    <Color x:Key="OverlayColor">#CC151518</Color>
-    <Color x:Key="SkeletonColor">#34343a</Color>
+    <!-- Legacy aliases for existing views -->
+    <Color x:Key="SuccessColor">#22C55E</Color>
+    <Color x:Key="WarningColor">#F59E0B</Color>
+    <Color x:Key="DangerColor">#EF4444</Color>
+
+    <!-- Overlay / skeleton -->
+    <Color x:Key="OverlayColor">#CC09090B</Color>
+    <Color x:Key="SkeletonFromColor">#161618</Color>
+    <Color x:Key="SkeletonToColor">#1E1E21</Color>
+    <Color x:Key="SkeletonColor">#1A1A1D</Color>
+
+    <!-- Interactive overlays -->
+    <Color x:Key="HoverOverlayColor">#0AFFFFFF</Color>       <!-- rgba(255,255,255,0.04) -->
+    <Color x:Key="PressedOverlayColor">#12FFFFFF</Color>      <!-- rgba(255,255,255,0.07) -->
 
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- SEMANTIC BRUSHES — use these in styles and views           -->
     <!-- ═══════════════════════════════════════════════════════════ -->
 
     <SolidColorBrush x:Key="BackgroundDarkBrush"  Color="{StaticResource BackgroundDarkColor}"/>
+    <SolidColorBrush x:Key="SidebarBrush"         Color="{StaticResource SidebarColor}"/>
     <SolidColorBrush x:Key="BackgroundBrush"       Color="{StaticResource BackgroundColor}"/>
     <SolidColorBrush x:Key="SurfaceBrush"          Color="{StaticResource SurfaceColor}"/>
     <SolidColorBrush x:Key="SurfaceLightBrush"     Color="{StaticResource SurfaceLightColor}"/>
@@ -49,14 +72,22 @@
 
     <SolidColorBrush x:Key="BorderBrush"           Color="{StaticResource BorderColor}"/>
     <SolidColorBrush x:Key="BorderStrongBrush"     Color="{StaticResource BorderStrongColor}"/>
+    <SolidColorBrush x:Key="BorderFocusBrush"      Color="{StaticResource BorderFocusColor}"/>
 
     <SolidColorBrush x:Key="TextPrimaryBrush"      Color="{StaticResource TextPrimaryColor}"/>
     <SolidColorBrush x:Key="TextSecondaryBrush"    Color="{StaticResource TextSecondaryColor}"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush"     Color="{StaticResource TextTertiaryColor}"/>
     <SolidColorBrush x:Key="TextMutedBrush"        Color="{StaticResource TextMutedColor}"/>
 
     <SolidColorBrush x:Key="AccentBrush"           Color="{StaticResource AccentColor}"/>
     <SolidColorBrush x:Key="AccentHoverBrush"      Color="{StaticResource AccentHoverColor}"/>
     <SolidColorBrush x:Key="AccentSoftBrush"       Color="{StaticResource AccentSoftColor}"/>
+
+    <SolidColorBrush x:Key="StatusWantBrush"       Color="{StaticResource StatusWantColor}"/>
+    <SolidColorBrush x:Key="StatusWatchingBrush"   Color="{StaticResource StatusWatchingColor}"/>
+    <SolidColorBrush x:Key="StatusDoneBrush"       Color="{StaticResource StatusDoneColor}"/>
+    <SolidColorBrush x:Key="StatusPausedBrush"     Color="{StaticResource StatusPausedColor}"/>
+    <SolidColorBrush x:Key="StatusDroppedBrush"    Color="{StaticResource StatusDroppedColor}"/>
 
     <SolidColorBrush x:Key="SuccessBrush"          Color="{StaticResource SuccessColor}"/>
     <SolidColorBrush x:Key="WarningBrush"          Color="{StaticResource WarningColor}"/>
@@ -65,32 +96,54 @@
     <SolidColorBrush x:Key="OverlayBrush"          Color="{StaticResource OverlayColor}"/>
     <SolidColorBrush x:Key="SkeletonBrush"         Color="{StaticResource SkeletonColor}"/>
 
+    <SolidColorBrush x:Key="HoverOverlayBrush"     Color="{StaticResource HoverOverlayColor}"/>
+    <SolidColorBrush x:Key="PressedOverlayBrush"   Color="{StaticResource PressedOverlayColor}"/>
+
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- TYPOGRAPHY TOKENS                                          -->
     <!-- ═══════════════════════════════════════════════════════════ -->
 
-    <!-- Display font: monospace for personality (headings, stats, nav) -->
-    <FontFamily x:Key="DisplayFont">Cascadia Code, Consolas, Courier New</FontFamily>
+    <!-- Primary font: Inter with Segoe UI Variable as Windows fallback -->
+    <FontFamily x:Key="DefaultFont">Segoe UI Variable, Segoe UI, Inter, Arial</FontFamily>
 
-    <!-- Body font: clean sans-serif for readability -->
-    <FontFamily x:Key="DefaultFont">Segoe UI Variable, Segoe UI, Arial</FontFamily>
+    <!-- Display font kept for nav/stats where mono adds personality -->
+    <FontFamily x:Key="DisplayFont">Segoe UI Variable, Segoe UI, Inter, Arial</FontFamily>
 
-    <sys:Double x:Key="FontSizeTiny">11</sys:Double>
-    <sys:Double x:Key="FontSizeSmall">12</sys:Double>
-    <sys:Double x:Key="FontSizeNormal">13.5</sys:Double>
-    <sys:Double x:Key="FontSizeMedium">16</sys:Double>
-    <sys:Double x:Key="FontSizeLarge">22</sys:Double>
-    <sys:Double x:Key="FontSizeXLarge">32</sys:Double>
-    <sys:Double x:Key="FontSizeHero">42</sys:Double>
+    <!-- Vault type scale (spec Part 7) -->
+    <sys:Double x:Key="FontSizeMicro">11</sys:Double>         <!-- status badges, counts -->
+    <sys:Double x:Key="FontSizeTiny">11</sys:Double>           <!-- alias -->
+    <sys:Double x:Key="FontSizeCaption">12</sys:Double>        <!-- metadata -->
+    <sys:Double x:Key="FontSizeSmall">12</sys:Double>          <!-- alias -->
+    <sys:Double x:Key="FontSizeLabel">13</sys:Double>          <!-- card titles, field labels -->
+    <sys:Double x:Key="FontSizeNormal">14</sys:Double>         <!-- body text -->
+    <sys:Double x:Key="FontSizeMedium">16</sys:Double>         <!-- alias -->
+    <sys:Double x:Key="FontSizeHeading">18</sys:Double>        <!-- section headers -->
+    <sys:Double x:Key="FontSizeTitle">22</sys:Double>          <!-- modal/detail titles -->
+    <sys:Double x:Key="FontSizeLarge">22</sys:Double>          <!-- alias -->
+    <sys:Double x:Key="FontSizeDisplay">28</sys:Double>        <!-- section display -->
+    <sys:Double x:Key="FontSizeXLarge">28</sys:Double>         <!-- alias -->
+    <sys:Double x:Key="FontSizeHero">42</sys:Double>           <!-- hero display -->
+
+    <!-- Font weights -->
+    <FontWeight x:Key="WeightNormal">Normal</FontWeight>       <!-- 400 -->
+    <FontWeight x:Key="WeightMedium">Medium</FontWeight>       <!-- 500 -->
+    <FontWeight x:Key="WeightSemiBold">SemiBold</FontWeight>   <!-- 600 -->
+    <FontWeight x:Key="WeightBold">Bold</FontWeight>           <!-- 700 -->
 
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- SPACING / RADIUS TOKENS                                    -->
     <!-- ═══════════════════════════════════════════════════════════ -->
 
-    <CornerRadius x:Key="RadiusSmall">4</CornerRadius>
-    <CornerRadius x:Key="RadiusMedium">6</CornerRadius>
-    <CornerRadius x:Key="RadiusLarge">10</CornerRadius>
+    <!-- Vault radius — progressive: larger component = larger radius -->
+    <CornerRadius x:Key="RadiusSmall">6</CornerRadius>         <!-- small buttons, tooltips -->
+    <CornerRadius x:Key="RadiusMedium">8</CornerRadius>        <!-- inputs, standard buttons -->
+    <CornerRadius x:Key="RadiusCard">10</CornerRadius>          <!-- cards -->
+    <CornerRadius x:Key="RadiusCover">8</CornerRadius>          <!-- poster/cover images -->
+    <CornerRadius x:Key="RadiusLarge">10</CornerRadius>         <!-- alias -->
+    <CornerRadius x:Key="RadiusModal">16</CornerRadius>         <!-- modals -->
+    <CornerRadius x:Key="RadiusPill">20</CornerRadius>          <!-- status pills -->
 
+    <!-- Spacing scale of 4px -->
     <Thickness x:Key="SpacingTiny">4</Thickness>
     <Thickness x:Key="SpacingSmall">8</Thickness>
     <Thickness x:Key="SpacingMedium">16</Thickness>
@@ -98,14 +151,19 @@
     <Thickness x:Key="SpacingXLarge">40</Thickness>
     <Thickness x:Key="SpacingHuge">64</Thickness>
 
+    <!-- Grid gutter -->
+    <sys:Double x:Key="GridGutter">16</sys:Double>
+    <sys:Double x:Key="ContainerPadding">20</sys:Double>
+
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- ANIMATION                                                  -->
     <!-- ═══════════════════════════════════════════════════════════ -->
 
+    <!-- Skeleton shimmer — 1.4s as per spec -->
     <Storyboard x:Key="SkeletonPulseStoryboard" RepeatBehavior="Forever" AutoReverse="True">
         <DoubleAnimation Storyboard.TargetProperty="Opacity"
                          From="0.3" To="0.7"
-                         Duration="0:0:1.0"/>
+                         Duration="0:0:1.4"/>
     </Storyboard>
 
 </ResourceDictionary>

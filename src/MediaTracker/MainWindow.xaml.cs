@@ -10,6 +10,8 @@ namespace MediaTracker;
 
 public partial class MainWindow : Window
 {
+    private bool _restoreLibrarySearchFocus;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -31,18 +33,62 @@ public partial class MainWindow : Window
 
     private void OnInlineSearchKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Escape && DataContext is MainViewModel vm)
+        if (DataContext is not MainViewModel vm)
+            return;
+
+        switch (e.Key)
         {
-            vm.CloseInlineSearchCommand.Execute(null);
-            e.Handled = true;
+            case Key.Escape:
+                _restoreLibrarySearchFocus = vm.CanSearch;
+                vm.CloseInlineSearchCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Down:
+                vm.MoveInlineSelection(1);
+                e.Handled = true;
+                break;
+            case Key.Up:
+                vm.MoveInlineSelection(-1);
+                e.Handled = true;
+                break;
+            case Key.Enter:
+                if (vm.TryImportSelectedInlineResult())
+                    e.Handled = true;
+                break;
         }
     }
 
     private void OnInlineSearchVisible(object sender, DependencyPropertyChangedEventArgs e)
     {
-        if (e.NewValue is Visibility.Visible && sender is TextBox tb)
+        if (e.NewValue is bool isVisible && isVisible && sender is TextBox tb)
         {
             tb.Dispatcher.BeginInvoke(() => tb.Focus(), System.Windows.Threading.DispatcherPriority.Input);
         }
+    }
+
+    private void OnLibrarySearchVisible(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (!_restoreLibrarySearchFocus)
+            return;
+
+        if (e.NewValue is bool isVisible && isVisible && sender is TextBox tb)
+        {
+            _restoreLibrarySearchFocus = false;
+            tb.Dispatcher.BeginInvoke(() => tb.Focus(), System.Windows.Threading.DispatcherPriority.Input);
+        }
+    }
+
+    private void OnInlineResultMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not ItemsControl itemsControl || DataContext is not MainViewModel vm)
+            return;
+
+        var container = ItemsControl.ContainerFromElement(itemsControl, e.OriginalSource as DependencyObject) as FrameworkElement;
+        if (container?.DataContext is not Services.Providers.SearchResult result)
+            return;
+
+        vm.SelectedInlineResult = result;
+        vm.InlineImportCommand.Execute(result);
+        e.Handled = true;
     }
 }

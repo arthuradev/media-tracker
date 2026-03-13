@@ -7,8 +7,8 @@
         xmlns:conv="clr-namespace:MediaTracker.Converters"
         mc:Ignorable="d"
         Title="Media Tracker"
-        Height="760"
-        Width="1280"
+        Height="900"
+        Width="1440"
         MinHeight="640"
         MinWidth="980"
         WindowStartupLocation="CenterScreen"
@@ -19,12 +19,13 @@
         <conv:NullToVisibilityConverter x:Key="NullToVis"/>
         <conv:MediaTypeDisplayConverter x:Key="TypeDisplay"/>
 
-        <!-- Nav link — text only, monospace, no chrome -->
+        <!-- Nav link — Vault sidebar style: 36px height, radius 6 -->
         <Style x:Key="NavButton" TargetType="Button" BasedOn="{StaticResource SidebarButton}">
-            <Setter Property="Padding"     Value="10,7"/>
+            <Setter Property="Padding"     Value="12,0"/>
             <Setter Property="Margin"      Value="0,1"/>
             <Setter Property="Tag"         Value="{Binding DataContext.CurrentSection, RelativeSource={RelativeSource AncestorType=Window}}"/>
             <Style.Triggers>
+                <!-- Active state: violet text + subtle violet background -->
                 <DataTrigger Value="True">
                     <DataTrigger.Binding>
                         <MultiBinding>
@@ -36,6 +37,7 @@
                         </MultiBinding>
                     </DataTrigger.Binding>
                     <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -43,78 +45,86 @@
 
     <Grid Background="{StaticResource BackgroundDarkBrush}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="220"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- SIDEBAR — text-only, quiet                             -->
+        <!-- SIDEBAR — #0D0D0F, recedes behind content              -->
         <!-- ═══════════════════════════════════════════════════════ -->
         <Border Grid.Column="0"
-                Background="{StaticResource BackgroundDarkBrush}">
-            <DockPanel Margin="20,28,16,24">
+                Background="{StaticResource SidebarBrush}">
+            <DockPanel Margin="16,16,16,12">
 
-                <!-- Bottom: settings -->
+                <!-- Bottom: settings icon -->
                 <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
                             CommandParameter="Settings"
-                            Content="settings"/>
+                            Content="Settings"
+                            FontSize="13"
+                            Foreground="{StaticResource TextMutedBrush}"/>
                 </StackPanel>
 
                 <!-- Top: brand + navigation -->
                 <StackPanel>
-                    <!-- Brand — just text, lowercase, monospace -->
-                    <TextBlock Text="media tracker"
-                               FontFamily="{StaticResource DisplayFont}"
-                               FontSize="{StaticResource FontSizeMedium}"
+                    <!-- Brand -->
+                    <TextBlock Text="Vault"
+                               FontFamily="{StaticResource DefaultFont}"
+                               FontSize="18"
+                               FontWeight="SemiBold"
                                Foreground="{StaticResource TextPrimaryBrush}"
-                               Margin="10,0,0,32"/>
+                               Margin="12,8,0,24"/>
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
                             CommandParameter="Home"
-                            Content="home"/>
+                            Content="Home"/>
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
                             CommandParameter="Library"
-                            Content="library"/>
+                            Content="Library"/>
+
+                    <!-- Separator -->
+                    <Border Height="1"
+                            Background="{StaticResource BorderBrush}"
+                            Margin="12,12,12,8"/>
 
                     <!-- Category label -->
-                    <TextBlock Text="categories"
+                    <TextBlock Text="CATEGORIES"
                                Style="{StaticResource PageEyebrowText}"
-                               Margin="10,20,0,8"/>
-
-                    <Button Style="{StaticResource NavButton}"
-                            Command="{Binding NavigateToCommand}"
-                            CommandParameter="Series"
-                            Content="series"/>
-
-                    <Button Style="{StaticResource NavButton}"
-                            Command="{Binding NavigateToCommand}"
-                            CommandParameter="Anime"
-                            Content="anime"/>
+                               Margin="12,4,0,8"/>
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
                             CommandParameter="Movies"
-                            Content="movies"/>
+                            Content="Movies"/>
+
+                    <Button Style="{StaticResource NavButton}"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter="Series"
+                            Content="Series"/>
+
+                    <Button Style="{StaticResource NavButton}"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter="Anime"
+                            Content="Anime"/>
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
                             CommandParameter="Games"
-                            Content="games"/>
+                            Content="Games"/>
 
-                    <!-- Curated label -->
-                    <TextBlock Text="curated"
-                               Style="{StaticResource PageEyebrowText}"
-                               Margin="10,20,0,8"/>
+                    <!-- Separator -->
+                    <Border Height="1"
+                            Background="{StaticResource BorderBrush}"
+                            Margin="12,12,12,8"/>
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
                             CommandParameter="Favorites"
-                            Content="favorites"/>
+                            Content="Favorites"/>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -124,192 +134,241 @@
         <!-- ═══════════════════════════════════════════════════════ -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="56"/>   <!-- Header -->
+                <RowDefinition Height="Auto"/> <!-- Update banner -->
+                <RowDefinition Height="*"/>    <!-- Content host -->
             </Grid.RowDefinitions>
 
-            <!-- Header — very light, no heavy border -->
+            <!-- Header — 56px, title + subtitle + actions -->
             <Border Grid.Row="0"
                     Background="{StaticResource BackgroundDarkBrush}"
-                    Padding="40,28,40,20">
-                <Grid>
+                    Padding="20,0">
+                <Grid VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding CurrentSection}"
-                                   Style="{StaticResource PageTitleText}"/>
-                        <TextBlock Text="{Binding CurrentSectionSubtitle}"
-                                   Style="{StaticResource CaptionText}"
-                                   Margin="0,6,0,0"/>
-                    </StackPanel>
+                    <!-- Section title -->
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding CurrentSection}"
+                               Style="{StaticResource PageTitleText}"/>
 
-                    <TextBox Grid.Column="1"
+                    <!-- Item count subtitle -->
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding CurrentSectionSubtitle}"
+                               Style="{StaticResource CaptionText}"
+                               VerticalAlignment="Center"
+                               Margin="12,2,0,0"/>
+
+                    <!-- Library search box -->
+                    <TextBox x:Name="LibrarySearchBox"
+                             Grid.Column="3"
                              Width="260"
                              Margin="0,0,12,0"
                              VerticalAlignment="Center"
-                             Style="{StaticResource SearchBox}"
-                             Visibility="{Binding CanSearch, Converter={StaticResource BoolToVis}}"
-                             Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"/>
+                             Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                             IsVisibleChanged="OnLibrarySearchVisible">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox" BasedOn="{StaticResource SearchBox}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding CanSearch}" Value="True"/>
+                                            <Condition Binding="{Binding IsInlineSearchOpen}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
 
-                    <!-- Add button / Inline search toggle -->
-                    <Grid Grid.Column="2"
-                          VerticalAlignment="Center"
-                          Visibility="{Binding CanAddNew, Converter={StaticResource BoolToVis}}">
+                    <!-- + Add button -->
+                    <Button Grid.Column="4"
+                            VerticalAlignment="Center"
+                            Command="{Binding ToggleInlineSearchCommand}"
+                            Content="+ Add">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource AccentButton}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding CanAddNew}" Value="True"/>
+                                            <Condition Binding="{Binding IsInlineSearchOpen}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
 
-                        <!-- State 1: "+ add" button (when search is closed) -->
-                        <Button Style="{StaticResource AccentButton}"
-                                Command="{Binding ToggleInlineSearchCommand}"
-                                Content="+ add"
-                                Visibility="{Binding IsInlineSearchOpen, Converter={StaticResource BoolToVis}, ConverterParameter=invert}"/>
+                    <!-- Inline search overlay (replaces search + add button) -->
+                    <Grid Grid.Column="3"
+                          Grid.ColumnSpan="2"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Center">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding CanAddNew}" Value="True"/>
+                                            <Condition Binding="{Binding IsInlineSearchOpen}" Value="True"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
 
-                        <!-- State 2: Inline search field (when search is open) -->
-                        <Grid Visibility="{Binding IsInlineSearchOpen, Converter={StaticResource BoolToVis}}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="340"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="420"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                            <TextBox x:Name="InlineSearchBox"
-                                     Grid.Column="0"
-                                     Style="{StaticResource InlineSearchBox}"
-                                     Text="{Binding InlineSearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                                     KeyDown="OnInlineSearchKeyDown"
-                                     IsVisibleChanged="OnInlineSearchVisible"/>
+                        <TextBox x:Name="InlineSearchBox"
+                                 Grid.Column="0"
+                                 Style="{StaticResource InlineSearchBox}"
+                                 Text="{Binding InlineSearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 PreviewKeyDown="OnInlineSearchKeyDown"
+                                 IsVisibleChanged="OnInlineSearchVisible"/>
 
-                            <Button Grid.Column="1"
-                                    Style="{StaticResource GhostButton}"
-                                    Command="{Binding CloseInlineSearchCommand}"
-                                    Content="esc"
-                                    Margin="8,0,0,0"
-                                    VerticalAlignment="Center"/>
+                        <Button Grid.Column="1"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding CloseInlineSearchCommand}"
+                                Content="esc"
+                                Margin="8,0,0,0"
+                                VerticalAlignment="Center"/>
 
-                            <!-- Dropdown popup anchored below the search box -->
-                            <Popup PlacementTarget="{Binding ElementName=InlineSearchBox}"
-                                   Placement="Bottom"
-                                   IsOpen="{Binding ShowInlineResults}"
-                                   AllowsTransparency="True"
-                                   StaysOpen="True"
-                                   PopupAnimation="Fade"
-                                   HorizontalOffset="0"
-                                   VerticalOffset="4">
-                                <Border Background="{StaticResource SurfaceBrush}"
-                                        CornerRadius="{StaticResource RadiusMedium}"
-                                        MinWidth="340"
-                                        MaxHeight="420"
-                                        Padding="4">
-                                    <StackPanel>
-                                        <!-- Loading indicator -->
-                                        <TextBlock Text="searching..."
-                                                   Style="{StaticResource CaptionText}"
-                                                   Margin="12,8"
-                                                   Visibility="{Binding IsInlineSearching, Converter={StaticResource BoolToVis}}"/>
+                        <!-- Results popup -->
+                        <Popup PlacementTarget="{Binding ElementName=InlineSearchBox}"
+                               Placement="Bottom"
+                               IsOpen="{Binding ShowInlineResults}"
+                               AllowsTransparency="True"
+                               StaysOpen="True"
+                               PopupAnimation="Fade"
+                               HorizontalOffset="0"
+                               VerticalOffset="6">
+                            <Border Background="{StaticResource SurfaceLightBrush}"
+                                    BorderBrush="{StaticResource BorderStrongBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusCard}"
+                                    MinWidth="420"
+                                    MaxHeight="440"
+                                    Padding="8">
+                                <StackPanel>
+                                    <TextBlock Text="searching..."
+                                               Style="{StaticResource CaptionText}"
+                                               Margin="10,6,10,8"
+                                               Visibility="{Binding IsInlineSearching, Converter={StaticResource BoolToVis}}"/>
 
-                                        <!-- Error -->
-                                        <TextBlock Text="{Binding InlineError}"
-                                                   Style="{StaticResource CaptionText}"
-                                                   Foreground="{StaticResource DangerBrush}"
-                                                   Margin="12,8"
-                                                   Visibility="{Binding InlineError, Converter={StaticResource NullToVis}}"/>
+                                    <TextBlock Text="{Binding InlineError}"
+                                               Style="{StaticResource CaptionText}"
+                                               Foreground="{StaticResource DangerBrush}"
+                                               Margin="10,6,10,8"
+                                               Visibility="{Binding InlineError, Converter={StaticResource NullToVis}}"/>
 
-                                        <!-- Empty state -->
-                                        <TextBlock Text="no results found."
-                                                   Style="{StaticResource CaptionText}"
-                                                   Margin="12,8"
-                                                   Visibility="{Binding ShowInlineEmpty, Converter={StaticResource BoolToVis}}"/>
+                                    <TextBlock Text="no results found."
+                                               Style="{StaticResource CaptionText}"
+                                               Margin="10,6,10,8"
+                                               Visibility="{Binding ShowInlineEmpty, Converter={StaticResource BoolToVis}}"/>
 
-                                        <!-- Results list -->
-                                        <ItemsControl ItemsSource="{Binding InlineResults}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Button Style="{StaticResource SearchResultButton}"
-                                                            Command="{Binding DataContext.InlineImportCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                            CommandParameter="{Binding}"
->
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                                <ColumnDefinition Width="*"/>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                            </Grid.ColumnDefinitions>
+                                    <ListBox x:Name="InlineResultsList"
+                                             ItemsSource="{Binding InlineResults}"
+                                             SelectedItem="{Binding SelectedInlineResult, Mode=TwoWay}"
+                                             Style="{StaticResource InlineResultsList}"
+                                             ItemContainerStyle="{StaticResource InlineResultsListItem}"
+                                             MaxHeight="320"
+                                             Margin="0,0,0,2"
+                                             PreviewKeyDown="OnInlineSearchKeyDown"
+                                             PreviewMouseLeftButtonUp="OnInlineResultMouseLeftButtonUp">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="10,10,12,10">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="36"/>
+                                                            <ColumnDefinition Width="12"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
 
-                                                            <!-- Title -->
-                                                            <TextBlock Grid.Column="0"
-                                                                       Text="{Binding Title}"
-                                                                       FontFamily="{StaticResource DisplayFont}"
-                                                                       FontSize="{StaticResource FontSizeSmall}"
-                                                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                                                       VerticalAlignment="Center"
-                                                                       TextTrimming="CharacterEllipsis"
-                                                                       MaxWidth="220"/>
+                                                        <!-- Thumbnail 36x54 per spec -->
+                                                        <Border Grid.Column="0"
+                                                                Width="36"
+                                                                Height="54"
+                                                                Background="{StaticResource SurfaceBrush}"
+                                                                CornerRadius="4"
+                                                                ClipToBounds="True">
+                                                            <Grid>
+                                                                <Image Source="{Binding CoverImageUrl}"
+                                                                       Stretch="UniformToFill"
+                                                                       Visibility="{Binding CoverImageUrl, Converter={StaticResource NullToVis}}"/>
+                                                            </Grid>
+                                                        </Border>
 
-                                                            <!-- Year -->
-                                                            <TextBlock Grid.Column="1"
-                                                                       Text="{Binding ReleaseYear}"
-                                                                       FontFamily="{StaticResource DisplayFont}"
-                                                                       FontSize="{StaticResource FontSizeTiny}"
-                                                                       Foreground="{StaticResource TextMutedBrush}"
-                                                                       VerticalAlignment="Center"
-                                                                       Margin="10,0,0,0"/>
+                                                        <StackPanel Grid.Column="2"
+                                                                    VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Title}"
+                                                                       Style="{StaticResource LabelText}"
+                                                                       TextTrimming="CharacterEllipsis"/>
 
-                                                            <!-- Type + Provider badges -->
-                                                            <StackPanel Grid.Column="2"
-                                                                        Orientation="Horizontal"
-                                                                        VerticalAlignment="Center">
+                                                            <StackPanel Orientation="Horizontal"
+                                                                        Margin="0,4,0,0">
+                                                                <TextBlock Text="{Binding ReleaseYear}"
+                                                                           Style="{StaticResource CaptionText}"
+                                                                           Visibility="{Binding ReleaseYear, Converter={StaticResource NullToVis}}"/>
+                                                                <TextBlock Text=" · "
+                                                                           Style="{StaticResource CaptionText}"
+                                                                           Visibility="{Binding ReleaseYear, Converter={StaticResource NullToVis}}"/>
                                                                 <TextBlock Text="{Binding MediaType, Converter={StaticResource TypeDisplay}}"
-                                                                           FontFamily="{StaticResource DisplayFont}"
-                                                                           FontSize="10"
-                                                                           Foreground="{StaticResource TextMutedBrush}"
-                                                                           Margin="8,0,0,0"/>
-                                                                <TextBlock Text="{Binding ProviderName}"
-                                                                           FontFamily="{StaticResource DisplayFont}"
-                                                                           FontSize="10"
-                                                                           Foreground="{StaticResource AccentBrush}"
-                                                                           Margin="8,0,0,0"/>
+                                                                           Style="{StaticResource CaptionText}"/>
                                                             </StackPanel>
-                                                        </Grid>
-                                                    </Button>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                                        </StackPanel>
 
-                                        <!-- Import loading -->
-                                        <TextBlock Text="importing..."
-                                                   Style="{StaticResource CaptionText}"
-                                                   Foreground="{StaticResource AccentBrush}"
-                                                   Margin="12,8"
-                                                   Visibility="{Binding IsInlineImporting, Converter={StaticResource BoolToVis}}"/>
+                                                        <TextBlock Grid.Column="3"
+                                                                   Text="{Binding ProviderName}"
+                                                                   Style="{StaticResource CaptionText}"
+                                                                   Opacity="0.6"
+                                                                   Margin="12,2,0,0"
+                                                                   VerticalAlignment="Top"/>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
 
-                                        <!-- Footer: manual add -->
-                                        <Separator Margin="4,4"/>
-                                        <Button Style="{StaticResource GhostButton}"
-                                                Command="{Binding InlineManualAddCommand}"
-                                                Content="add manually"
-                                                HorizontalAlignment="Left"
-                                                Margin="4,0,0,4"/>
-                                    </StackPanel>
-                                </Border>
-                            </Popup>
-                        </Grid>
+                                    <TextBlock Text="importing..."
+                                               Style="{StaticResource CaptionText}"
+                                               Foreground="{StaticResource AccentBrush}"
+                                               Margin="10,6,10,8"
+                                               Visibility="{Binding IsInlineImporting, Converter={StaticResource BoolToVis}}"/>
+
+                                    <Separator Margin="4,4"/>
+
+                                    <Button Style="{StaticResource GhostButton}"
+                                            Command="{Binding InlineManualAddCommand}"
+                                            Content="Can't find it? Add manually"
+                                            HorizontalAlignment="Left"
+                                            Margin="4,0,0,2"/>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
                     </Grid>
                 </Grid>
             </Border>
 
-            <!-- Subtle separator line -->
-            <Border Grid.Row="0"
-                    VerticalAlignment="Bottom"
-                    Height="1"
-                    Background="{StaticResource BorderBrush}"
-                    Opacity="0.3"
-                    Margin="40,0"/>
-
             <!-- Update banner -->
             <Border Grid.Row="1"
-                    Margin="40,16,40,0"
+                    Margin="20,8,20,0"
                     Style="{StaticResource WarningBanner}"
                     Visibility="{Binding IsUpdateBannerVisible, Converter={StaticResource BoolToVis}}">
                 <Grid>
@@ -341,7 +400,7 @@
             <!-- Content host -->
             <Border Grid.Row="2"
                     Background="{StaticResource BackgroundDarkBrush}"
-                    Padding="40,24,40,24">
+                    Padding="20,12,20,20">
                 <ContentControl x:Name="CurrentViewHost"
                                 Content="{Binding CurrentView, NotifyOnTargetUpdated=True}"
                                 TargetUpdated="OnCurrentViewChanged"/>

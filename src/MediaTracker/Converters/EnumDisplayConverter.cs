@@ -69,11 +69,11 @@ public class StatusToBrushConverter : IValueConverter
 
         string key = status switch
         {
-            MediaStatus.Watching => "AccentBrush",
-            MediaStatus.Completed => "SuccessBrush",
-            MediaStatus.Paused => "WarningBrush",
-            MediaStatus.Dropped => "DangerBrush",
-            _ => "TextMutedBrush"
+            MediaStatus.Watching => "StatusWatchingBrush",
+            MediaStatus.Completed => "StatusDoneBrush",
+            MediaStatus.Paused => "StatusPausedBrush",
+            MediaStatus.Dropped => "StatusDroppedBrush",
+            _ => "StatusWantBrush"
         };
 
         return System.Windows.Application.Current.FindResource(key);
