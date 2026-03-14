@@ -327,7 +327,7 @@ public sealed class RobustnessTests
         var http = new ResilientHttpService(client, cache, new FakeLogger<ResilientHttpService>());
         var settings = new AppSettings();
         var localization = TestServices.CreateLocalizationService(settings);
-        var provider = new RawgProvider(http, settings, localization, new FakeLogger<RawgProvider>());
+        var provider = new RawgProvider(http, settings, localization, new DeepLTranslationService(http, settings, localization, new FakeLogger<DeepLTranslationService>()), new FakeLogger<RawgProvider>());
 
         Assert.False(provider.IsConfigured);
 

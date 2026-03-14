@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 using MediaTracker.Models;
 using MediaTracker.Services;
 using MediaTracker.Services.Providers;
@@ -113,6 +114,20 @@ public sealed class MainViewModelTests
         localization.SetLanguage(AppLanguage.PortugueseBrazil);
 
         Assert.Equal("Filmes", vm.CurrentSectionTitle);
-        Assert.Equal("Uma prateleira focada em filmes, notas e revisitas rapidas.", vm.CurrentSectionSubtitle);
+        Assert.Equal("Uma prateleira focada em filmes, notas e revisitas rápidas.", vm.CurrentSectionSubtitle);
     }
+
+    [Fact]
+    public void MainWindowKeepsSettingsNavigationEntryInSidebar()
+    {
+        string mainWindowPath = GetWorkspacePath("MediaTracker", "MainWindow.xaml");
+        string xaml = File.ReadAllText(mainWindowPath);
+
+        Assert.Contains("CommandParameter=\"{x:Static models:AppSection.Settings}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Content=\"{Binding [nav.settings], Source={StaticResource Loc}}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Grid.Row=\"1\"", xaml, StringComparison.Ordinal);
+    }
+
+    private static string GetWorkspacePath(string projectName, string fileName, [CallerFilePath] string callerFilePath = "")
+        => Path.GetFullPath(Path.Combine(Path.GetDirectoryName(callerFilePath)!, "..", projectName, fileName));
 }

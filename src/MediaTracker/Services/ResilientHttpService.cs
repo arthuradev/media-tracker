@@ -32,12 +32,13 @@ public class ResilientHttpService
         string cacheKey,
         TimeSpan cacheDuration,
         CancellationToken ct = default,
-        bool bypassCache = false)
+        bool bypassCache = false,
+        Action<HttpRequestMessage>? configureRequest = null)
     {
         if (!bypassCache && _cache.TryGetValue(cacheKey, out T? cached))
             return cached;
 
-        using var response = await SendWithRetryAsync(url, ct);
+        using var response = await SendWithRetryAsync(url, ct, configureRequest);
         if (response is null)
             return default;
 
@@ -50,16 +51,47 @@ public class ResilientHttpService
         return value;
     }
 
-    public async Task<byte[]?> DownloadBytesAsync(string url, CancellationToken ct = default)
+    public async Task<T?> PostFormAsync<T>(
+        string url,
+        Dictionary<string, string> formData,
+        string cacheKey,
+        TimeSpan cacheDuration,
+        CancellationToken ct = default,
+        Action<HttpRequestMessage>? configureRequest = null)
     {
-        using var response = await SendWithRetryAsync(url, ct);
+        if (_cache.TryGetValue(cacheKey, out T? cached))
+            return cached;
+
+        using var response = await SendPostWithRetryAsync(url, formData, ct, configureRequest);
+        if (response is null)
+            return default;
+
+        await using var stream = await response.Content.ReadAsStreamAsync(ct);
+        var value = await JsonSerializer.DeserializeAsync<T>(stream, JsonOptions, ct);
+
+        if (value is not null)
+            _cache.Set(cacheKey, value, cacheDuration);
+
+        return value;
+    }
+
+    public async Task<byte[]?> DownloadBytesAsync(
+        string url,
+        CancellationToken ct = default,
+        Action<HttpRequestMessage>? configureRequest = null)
+    {
+        using var response = await SendWithRetryAsync(url, ct, configureRequest);
         if (response is null)
             return null;
 
         return await response.Content.ReadAsByteArrayAsync(ct);
     }
 
-    private async Task<HttpResponseMessage?> SendWithRetryAsync(string url, CancellationToken ct)
+    private async Task<HttpResponseMessage?> SendPostWithRetryAsync(
+        string url,
+        Dictionary<string, string> formData,
+        CancellationToken ct,
+        Action<HttpRequestMessage>? configureRequest = null)
     {
         const int maxAttempts = 3;
 
@@ -67,7 +99,67 @@ public class ResilientHttpService
         {
             try
             {
-                var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+                using var request = new HttpRequestMessage(HttpMethod.Post, url)
+                {
+                    Content = new FormUrlEncodedContent(formData)
+                };
+                configureRequest?.Invoke(request);
+
+                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+
+                if (response.IsSuccessStatusCode)
+                    return response;
+
+                if (!ShouldRetry(response.StatusCode) || attempt == maxAttempts)
+                {
+                    _logger.LogWarning(
+                        "Remote POST request failed with status code {StatusCode} for {Url}",
+                        (int)response.StatusCode,
+                        url);
+                    response.Dispose();
+                    return null;
+                }
+
+                response.Dispose();
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                if (attempt == maxAttempts)
+                {
+                    _logger.LogWarning("Remote POST request timed out for {Url}", url);
+                    return null;
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                if (attempt == maxAttempts)
+                {
+                    _logger.LogWarning(ex, "Remote POST request failed for {Url}", url);
+                    return null;
+                }
+            }
+
+            await Task.Delay(GetRetryDelay(attempt), ct);
+        }
+
+        return null;
+    }
+
+    private async Task<HttpResponseMessage?> SendWithRetryAsync(
+        string url,
+        CancellationToken ct,
+        Action<HttpRequestMessage>? configureRequest = null)
+    {
+        const int maxAttempts = 3;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                configureRequest?.Invoke(request);
+
+                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
 
                 if (response.IsSuccessStatusCode)
                     return response;

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MediaTracker.Data;
 using MediaTracker.Models;
+using MediaTracker.Services.Providers;
 
 namespace MediaTracker.Services;
 
@@ -69,6 +70,20 @@ public class MediaService
         await using var db = await _dbFactory.CreateDbContextAsync();
         item.UpdatedAt = DateTime.UtcNow;
         db.MediaItems.Update(item);
+        await db.SaveChangesAsync();
+    }
+
+    public async Task UpdateProviderMetadataAsync(int mediaItemId, SearchResult details)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        var item = await db.MediaItems.FindAsync(mediaItemId);
+        if (item is null)
+            return;
+
+        ApplyProviderMetadata(item, details);
+        item.LastSyncedAt = DateTime.UtcNow;
+        item.UpdatedAt = DateTime.UtcNow;
+
         await db.SaveChangesAsync();
     }
 
@@ -146,6 +161,54 @@ public class MediaService
         return newEpisodes.Count;
     }
 
+    public async Task<int> UpsertEpisodesAsync(List<Episode> episodes)
+    {
+        if (episodes.Count == 0)
+            return 0;
+
+        await using var db = await _dbFactory.CreateDbContextAsync();
+
+        int mediaItemId = episodes[0].MediaItemId;
+        var existingEpisodes = await db.Episodes
+            .Where(e => e.MediaItemId == mediaItemId)
+            .ToListAsync();
+
+        var existingByKey = existingEpisodes.ToDictionary(
+            episode => $"{episode.SeasonNumber}:{episode.EpisodeNumber}",
+            StringComparer.Ordinal);
+
+        int changedCount = 0;
+
+        foreach (var incoming in episodes)
+        {
+            string key = $"{incoming.SeasonNumber}:{incoming.EpisodeNumber}";
+
+            if (existingByKey.TryGetValue(key, out var existing))
+            {
+                if (ApplyEpisodeMetadata(existing, incoming))
+                    changedCount++;
+
+                continue;
+            }
+
+            db.Episodes.Add(incoming);
+            changedCount++;
+        }
+
+        if (changedCount == 0)
+            return 0;
+
+        var item = await db.MediaItems.FindAsync(mediaItemId);
+        if (item is not null)
+        {
+            item.LastSyncedAt = DateTime.UtcNow;
+            item.UpdatedAt = DateTime.UtcNow;
+        }
+
+        await db.SaveChangesAsync();
+        return changedCount;
+    }
+
     public async Task ToggleEpisodeWatchedAsync(int episodeId)
     {
         await using var db = await _dbFactory.CreateDbContextAsync();
@@ -221,4 +284,71 @@ public class MediaService
 
         await db.SaveChangesAsync();
     }
+
+    private static void ApplyProviderMetadata(MediaItem item, SearchResult details)
+    {
+        string? title = NormalizeOptionalText(details.Title);
+        if (title is not null)
+            item.Title = title;
+
+        string? originalTitle = NormalizeOptionalText(details.OriginalTitle);
+        if (originalTitle is not null)
+            item.OriginalTitle = originalTitle;
+
+        if (details.ReleaseYear.HasValue)
+            item.ReleaseYear = details.ReleaseYear;
+
+        string? synopsis = NormalizeOptionalText(details.Synopsis);
+        if (synopsis is not null)
+            item.Synopsis = synopsis;
+
+        string? genres = NormalizeOptionalText(details.Genres);
+        if (genres is not null)
+            item.Genres = genres;
+
+        if (details.TotalEpisodes.HasValue)
+            item.TotalEpisodes = details.TotalEpisodes;
+
+        if (details.TotalSeasons.HasValue)
+            item.TotalSeasons = details.TotalSeasons;
+
+        if (details.RuntimeMinutes.HasValue)
+            item.RuntimeMinutes = details.RuntimeMinutes;
+    }
+
+    private static bool ApplyEpisodeMetadata(Episode existing, Episode incoming)
+    {
+        bool changed = false;
+
+        string? title = NormalizeOptionalText(incoming.Title);
+        if (title is not null && !string.Equals(existing.Title, title, StringComparison.Ordinal))
+        {
+            existing.Title = title;
+            changed = true;
+        }
+
+        string? overview = NormalizeOptionalText(incoming.Overview);
+        if (overview is not null && !string.Equals(existing.Overview, overview, StringComparison.Ordinal))
+        {
+            existing.Overview = overview;
+            changed = true;
+        }
+
+        if (incoming.AirDate != existing.AirDate)
+        {
+            existing.AirDate = incoming.AirDate;
+            changed = true;
+        }
+
+        if (incoming.Runtime != existing.Runtime)
+        {
+            existing.Runtime = incoming.Runtime;
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static string? NormalizeOptionalText(string? value)
+        => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

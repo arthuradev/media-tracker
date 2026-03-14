@@ -15,7 +15,8 @@ public sealed class LocalizationServiceTests
         Assert.Equal("Home", localization.Get("nav.home"));
 
         localization.SetLanguage(AppLanguage.PortugueseBrazil);
-        Assert.Equal("Inicio", localization.Get("nav.home"));
+        Assert.Equal("Início", localization.Get("nav.home"));
+        Assert.Equal("Configurações", localization.Get("nav.settings"));
 
         localization.SetLanguage(AppLanguage.Spanish);
         Assert.Equal("Inicio", localization.Get("nav.home"));

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MediaTracker.Models;
@@ -14,6 +15,8 @@ public partial class DetailViewModel : ObservableObject
     private readonly Action _onBack;
     private readonly Action<MediaItem> _onEdit;
     private readonly Action _onDeleted;
+    private int? _loadedItemId;
+    private int _loadVersion;
 
     [ObservableProperty]
     private MediaItem? _item;
@@ -50,44 +53,36 @@ public partial class DetailViewModel : ObservableObject
         _onBack = onBack;
         _onEdit = onEdit;
         _onDeleted = onDeleted;
+
+        PropertyChangedEventManager.AddHandler(_localization, OnLocalizationPropertyChanged, nameof(LocalizationService.CurrentLanguage));
     }
 
     [RelayCommand]
     private async Task LoadAsync(int id)
     {
+        _loadedItemId = id;
+        int loadVersion = Interlocked.Increment(ref _loadVersion);
+
         IsLoading = true;
-        ErrorMessage = null;
-        Item = null;
-        IsSeriesOrAnime = false;
-        IsGame = false;
-        EpisodesViewModel = null;
-        GameProgressViewModel = null;
+        ResetViewState();
+
         try
         {
-            Item = await _mediaService.GetByIdAsync(id);
-            if (Item is null)
+            var item = await _mediaService.GetByIdAsync(id);
+            if (loadVersion != _loadVersion)
+                return;
+
+            if (item is null)
             {
                 ErrorMessage = _localization.Get("detail.loadMissing");
                 return;
             }
 
-            IsSeriesOrAnime = Item.MediaType is MediaType.Series or MediaType.Anime;
-            IsGame = Item.MediaType is MediaType.Game;
+            item = await RefreshLocalizedContentAsync(item, loadVersion);
+            if (loadVersion != _loadVersion)
+                return;
 
-            if (IsSeriesOrAnime)
-            {
-                var mapping = Item.ProviderMappings.FirstOrDefault();
-                EpisodesViewModel = new EpisodesViewModel(
-                    _mediaService, _providers, _localization, Item.Id,
-                    mapping?.ExternalId, mapping?.ProviderName,
-                    Item.TotalSeasons);
-            }
-
-            if (IsGame)
-            {
-                GameProgressViewModel = new GameProgressViewModel(
-                    _mediaService, _localization, Item.Id, Item.GameProgress);
-            }
+            ApplyItemState(item);
         }
         catch (Exception)
         {
@@ -121,6 +116,147 @@ public partial class DetailViewModel : ObservableObject
         catch (Exception)
         {
             ErrorMessage = _localization.Get("detail.deleteError");
+        }
+    }
+
+    private void ResetViewState()
+    {
+        ErrorMessage = null;
+        Item = null;
+        IsSeriesOrAnime = false;
+        IsGame = false;
+        EpisodesViewModel = null;
+        GameProgressViewModel = null;
+    }
+
+    private void ApplyItemState(MediaItem item)
+    {
+        Item = item;
+        IsSeriesOrAnime = item.MediaType is MediaType.Series or MediaType.Anime;
+        IsGame = item.MediaType is MediaType.Game;
+
+        var mapping = item.ProviderMappings.FirstOrDefault();
+
+        EpisodesViewModel = IsSeriesOrAnime
+            ? new EpisodesViewModel(
+                _mediaService,
+                _providers,
+                _localization,
+                item.Id,
+                mapping?.ExternalId,
+                mapping?.ProviderName,
+                item.TotalSeasons)
+            : null;
+
+        GameProgressViewModel = IsGame
+            ? new GameProgressViewModel(_mediaService, _localization, item.Id, item.GameProgress)
+            : null;
+    }
+
+    private async Task<MediaItem> RefreshLocalizedContentAsync(MediaItem item, int loadVersion)
+    {
+        var mapping = item.ProviderMappings.FirstOrDefault();
+        if (mapping is null)
+            return item;
+
+        var provider = _providers.FirstOrDefault(p => p.Name == mapping.ProviderName && p.IsConfigured);
+        if (provider is null)
+            return item;
+
+        bool metadataChanged = false;
+
+        try
+        {
+            var details = await provider.GetDetailsAsync(mapping.ExternalId, item.MediaType);
+            if (loadVersion != _loadVersion)
+                return item;
+
+            if (details is not null)
+            {
+                await _mediaService.UpdateProviderMetadataAsync(item.Id, details);
+                metadataChanged = true;
+            }
+
+            if (item.MediaType is MediaType.Series or MediaType.Anime)
+            {
+                metadataChanged |= await RefreshEpisodeContentAsync(item, mapping, provider, loadVersion) > 0;
+            }
+        }
+        catch
+        {
+            return item;
+        }
+
+        if (!metadataChanged)
+            return item;
+
+        return await _mediaService.GetByIdAsync(item.Id) ?? item;
+    }
+
+    private async Task<int> RefreshEpisodeContentAsync(
+        MediaItem item,
+        ProviderMapping mapping,
+        IMetadataProvider provider,
+        int loadVersion)
+    {
+        var seasonNumbers = item.Episodes
+            .Select(e => e.SeasonNumber)
+            .Distinct()
+            .OrderBy(number => number)
+            .ToList();
+
+        if (seasonNumbers.Count == 0)
+            return 0;
+
+        var localizedEpisodes = new List<Episode>();
+
+        foreach (int seasonNumber in seasonNumbers)
+        {
+            var fetchedEpisodes = await provider.GetEpisodesAsync(mapping.ExternalId, seasonNumber);
+            if (loadVersion != _loadVersion)
+                return 0;
+
+            localizedEpisodes.AddRange(fetchedEpisodes.Select(episode => new Episode
+            {
+                MediaItemId = item.Id,
+                SeasonNumber = episode.SeasonNumber,
+                EpisodeNumber = episode.EpisodeNumber,
+                Title = episode.Title,
+                Overview = episode.Overview,
+                AirDate = episode.AirDate,
+                Runtime = episode.Runtime
+            }));
+        }
+
+        return await _mediaService.UpsertEpisodesAsync(localizedEpisodes);
+    }
+
+    private void OnLocalizationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (_loadedItemId is not int id || id <= 0 || Item is null)
+            return;
+
+        _ = RefreshCurrentItemAsync(id);
+    }
+
+    private async Task RefreshCurrentItemAsync(int id)
+    {
+        int loadVersion = Interlocked.Increment(ref _loadVersion);
+
+        try
+        {
+            var item = await _mediaService.GetByIdAsync(id);
+            if (loadVersion != _loadVersion || item is null)
+                return;
+
+            item = await RefreshLocalizedContentAsync(item, loadVersion);
+            if (loadVersion != _loadVersion)
+                return;
+
+            ApplyItemState(item);
+        }
+        catch
+        {
         }
     }
 }

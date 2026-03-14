@@ -25,6 +25,9 @@ public partial class SettingsViewModel : ObservableObject
     private string _rawgApiKey;
 
     [ObservableProperty]
+    private string _deepLApiKey;
+
+    [ObservableProperty]
     private string _updateFeedUrl;
 
     [ObservableProperty]
@@ -78,6 +81,7 @@ public partial class SettingsViewModel : ObservableObject
 
         _tmdbApiKey = settings.TmdbApiKey;
         _rawgApiKey = settings.RawgApiKey;
+        _deepLApiKey = settings.DeepLApiKey;
         _updateFeedUrl = settings.UpdateFeedUrl;
         _checkForUpdatesOnStartup = settings.CheckForUpdatesOnStartup;
         _selectedLanguage = settings.PreferredLanguage;
@@ -131,6 +135,7 @@ public partial class SettingsViewModel : ObservableObject
         {
             _settings.TmdbApiKey = TmdbApiKey.Trim();
             _settings.RawgApiKey = RawgApiKey.Trim();
+            _settings.DeepLApiKey = DeepLApiKey.Trim();
             _settings.UpdateFeedUrl = UpdateFeedUrl.Trim();
             _settings.CheckForUpdatesOnStartup = CheckForUpdatesOnStartup;
             _settings.Save();

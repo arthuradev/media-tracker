@@ -94,6 +94,9 @@ public partial class App : Application
         services.AddSingleton<MediaService>();
         services.AddSingleton<ImageCacheService>();
 
+        // Translation
+        services.AddSingleton<DeepLTranslationService>();
+
         // Metadata providers
         services.AddSingleton<IMetadataProvider>(sp =>
             new TmdbProvider(
@@ -106,6 +109,7 @@ public partial class App : Application
                 sp.GetRequiredService<ResilientHttpService>(),
                 sp.GetRequiredService<AppSettings>(),
                 sp.GetRequiredService<LocalizationService>(),
+                sp.GetRequiredService<DeepLTranslationService>(),
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<RawgProvider>>()));
 
         services.AddSingleton<MainViewModel>();
