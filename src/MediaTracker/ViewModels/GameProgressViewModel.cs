@@ -8,6 +8,7 @@ namespace MediaTracker.ViewModels;
 public partial class GameProgressViewModel : ObservableObject
 {
     private readonly MediaService _mediaService;
+    private readonly LocalizationService _localization;
     private readonly int _mediaItemId;
 
     [ObservableProperty]
@@ -33,9 +34,10 @@ public partial class GameProgressViewModel : ObservableObject
 
     public Array CompletionStates => Enum.GetValues<CompletionState>();
 
-    public GameProgressViewModel(MediaService mediaService, int mediaItemId, GameProgress? existing)
+    public GameProgressViewModel(MediaService mediaService, LocalizationService localization, int mediaItemId, GameProgress? existing)
     {
         _mediaService = mediaService;
+        _localization = localization;
         _mediaItemId = mediaItemId;
 
         if (existing is not null)
@@ -52,7 +54,7 @@ public partial class GameProgressViewModel : ObservableObject
     {
         IsSaving = true;
         StatusMessage = null;
-        ErrorMessage = MediaInputValidator.ValidateGameProgress(HoursPlayed);
+        ErrorMessage = MediaInputValidator.ValidateGameProgress(_localization, HoursPlayed);
 
         if (!string.IsNullOrEmpty(ErrorMessage))
         {
@@ -72,11 +74,11 @@ public partial class GameProgressViewModel : ObservableObject
         try
         {
             await _mediaService.UpdateGameProgressAsync(progress);
-            StatusMessage = "Progress saved.";
+            StatusMessage = _localization.Get("progress.saved");
         }
         catch (Exception)
         {
-            ErrorMessage = "Could not save game progress right now.";
+            ErrorMessage = _localization.Get("gameProgress.saveError");
         }
         finally
         {

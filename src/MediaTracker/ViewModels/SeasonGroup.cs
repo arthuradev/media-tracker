@@ -1,12 +1,13 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using MediaTracker.Services;
 
 namespace MediaTracker.ViewModels;
 
 public partial class SeasonGroup : ObservableObject
 {
     public int SeasonNumber { get; set; }
-    public string Header => $"Season {SeasonNumber}";
+    public string Header => LocalizationService.Current?.Format("episodes.seasonHeader", SeasonNumber) ?? $"Season {SeasonNumber}";
     public ObservableCollection<EpisodeViewModel> Episodes { get; set; } = [];
 
     [ObservableProperty]

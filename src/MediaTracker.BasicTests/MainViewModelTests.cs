@@ -12,12 +12,15 @@ public sealed class MainViewModelTests
     public void ToggleInlineSearchFallsBackToManualAddWhenNoProviderIsConfigured()
     {
         bool manualAddRequested = false;
+        var settings = new AppSettings { PreferredLanguage = AppLanguage.English };
+        var localization = TestServices.CreateLocalizationService(settings);
         var vm = new MainViewModel(
             new FakeMediaService(),
             [new FakeProvider(isConfigured: false)],
             new FakeImageCacheService(),
-            new AppSettings(),
-            TestServices.CreateUpdateService(),
+            settings,
+            localization,
+            TestServices.CreateUpdateService(settings, localization),
             openManualAddOverride: () => manualAddRequested = true,
             initializeShell: false);
 
@@ -30,12 +33,15 @@ public sealed class MainViewModelTests
     [Fact]
     public void ToggleInlineSearchOpensInlineSearchWhenAProviderIsConfigured()
     {
+        var settings = new AppSettings { PreferredLanguage = AppLanguage.English };
+        var localization = TestServices.CreateLocalizationService(settings);
         var vm = new MainViewModel(
             new FakeMediaService(),
             [new FakeProvider(isConfigured: true)],
             new FakeImageCacheService(),
-            new AppSettings(),
-            TestServices.CreateUpdateService(),
+            settings,
+            localization,
+            TestServices.CreateUpdateService(settings, localization),
             initializeShell: false);
 
         vm.ToggleInlineSearchCommand.Execute(null);
@@ -46,12 +52,15 @@ public sealed class MainViewModelTests
     [Fact]
     public void CloseInlineSearchClearsTransientInlineState()
     {
+        var settings = new AppSettings { PreferredLanguage = AppLanguage.English };
+        var localization = TestServices.CreateLocalizationService(settings);
         var vm = new MainViewModel(
             new FakeMediaService(),
             [new FakeProvider(isConfigured: true)],
             new FakeImageCacheService(),
-            new AppSettings(),
-            TestServices.CreateUpdateService(),
+            settings,
+            localization,
+            TestServices.CreateUpdateService(settings, localization),
             initializeShell: false);
 
         var result = new SearchResult
@@ -81,5 +90,29 @@ public sealed class MainViewModelTests
         Assert.False(vm.ShowInlineEmpty);
         Assert.Null(vm.InlineError);
         Assert.False(vm.IsInlineSearching);
+    }
+
+    [Fact]
+    public void CurrentSectionTitleAndSubtitleUpdateWhenLanguageChanges()
+    {
+        var settings = new AppSettings { PreferredLanguage = AppLanguage.English };
+        var localization = TestServices.CreateLocalizationService(settings);
+        var vm = new MainViewModel(
+            new FakeMediaService(),
+            [new FakeProvider(isConfigured: true)],
+            new FakeImageCacheService(),
+            settings,
+            localization,
+            TestServices.CreateUpdateService(settings, localization),
+            initializeShell: false);
+
+        vm.CurrentSection = AppSection.Movies;
+
+        Assert.Equal("Movies", vm.CurrentSectionTitle);
+
+        localization.SetLanguage(AppLanguage.PortugueseBrazil);
+
+        Assert.Equal("Filmes", vm.CurrentSectionTitle);
+        Assert.Equal("Uma prateleira focada em filmes, notas e revisitas rapidas.", vm.CurrentSectionSubtitle);
     }
 }

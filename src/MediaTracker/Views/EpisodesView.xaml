@@ -23,7 +23,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel>
-                    <TextBlock Text="Episodes" Style="{StaticResource SectionTitleText}"/>
+                    <TextBlock Text="{Binding [episodes.title], Source={StaticResource Loc}}" Style="{StaticResource SectionTitleText}"/>
                     <TextBlock Text="{Binding ProgressSummary}"
                                Style="{StaticResource BodyText}"
                                Margin="0,8,0,0"
@@ -31,7 +31,7 @@
                 </StackPanel>
 
                 <Button Grid.Column="1"
-                        Content="Fetch Episode Data"
+                        Content="{Binding [episodes.fetchAll], Source={StaticResource Loc}}"
                         Style="{StaticResource SecondaryButton}"
                         Command="{Binding FetchAllSeasonsCommand}"
                         Visibility="{Binding CanFetch, Converter={StaticResource BoolToVis}}"/>
@@ -65,7 +65,7 @@
                 Margin="0,16,0,0"
                 Visibility="{Binding HasEpisodes, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
             <StackPanel>
-                <TextBlock Text="No episode list yet"
+                <TextBlock Text="{Binding [episodes.emptyTitle], Source={StaticResource Loc}}"
                            Style="{StaticResource SectionTitleText}"/>
                 <TextBlock Text="{Binding EmptyStateMessage}"
                            Style="{StaticResource BodyText}"
@@ -144,12 +144,10 @@
                                                                       DockPanel.Dock="Left"/>
 
                                                             <StackPanel DockPanel.Dock="Left">
-                                                                <TextBlock FontSize="13"
+                                                                <TextBlock Text="{Binding DisplayTitle}"
+                                                                           FontSize="13"
                                                                            FontWeight="SemiBold"
-                                                                           Foreground="{StaticResource TextPrimaryBrush}">
-                                                                    <Run Text="Episode "/>
-                                                                    <Run Text="{Binding EpisodeNumber}"/>
-                                                                </TextBlock>
+                                                                           Foreground="{StaticResource TextPrimaryBrush}"/>
                                                                 <TextBlock Text="{Binding Title}"
                                                                            Style="{StaticResource CaptionText}"
                                                                            Margin="0,4,0,0"

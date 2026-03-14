@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:conv="clr-namespace:MediaTracker.Converters"
+             xmlns:models="clr-namespace:MediaTracker.Models"
              xmlns:vm="clr-namespace:MediaTracker.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:SettingsViewModel}">
@@ -11,6 +12,7 @@
     <UserControl.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
         <conv:NullToVisibilityConverter x:Key="NullToVis"/>
+        <conv:EqualityToStyleConverter x:Key="EqualityToStyle"/>
 
         <Style x:Key="SettingsLabel" TargetType="TextBlock" BasedOn="{StaticResource CaptionText}">
             <Setter Property="Margin" Value="0,16,0,6"/>
@@ -18,126 +20,337 @@
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel MaxWidth="760">
-            <Border Style="{StaticResource ElevatedCard}" Padding="28" Margin="0,0,0,18">
-                <StackPanel>
-                    <TextBlock Text="API SETUP" Style="{StaticResource PageEyebrowText}"/>
-                    <TextBlock Text="Connect metadata providers"
-                               Style="{StaticResource PageTitleText}"
-                               FontSize="{StaticResource FontSizeLarge}"
-                               Margin="0,12,0,0"/>
-                    <TextBlock Text="Add your personal API keys so the app can search and enrich titles while keeping the local library fully yours."
-                               Style="{StaticResource BodyText}"
-                               Margin="0,12,0,0"
-                               TextWrapping="Wrap"/>
+        <StackPanel MaxWidth="980">
+            <WrapPanel Margin="0,0,0,18">
+                <Button Content="{Binding [settings.tabs.general], Source={StaticResource Loc}}"
+                        Command="{Binding SelectTabCommand}"
+                        CommandParameter="{x:Static models:SettingsTab.General}">
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource EqualityToStyle}">
+                            <Binding Path="SelectedTab"/>
+                            <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                            <Binding Source="{StaticResource StatusPillActive}"/>
+                            <Binding Source="{StaticResource StatusPill}"/>
+                        </MultiBinding>
+                    </Button.Style>
+                </Button>
 
-                    <Border Style="{StaticResource ErrorBanner}"
-                            Margin="0,18,0,0"
-                            Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVis}}">
-                        <TextBlock Text="{Binding ErrorMessage}"
-                                   Style="{StaticResource BannerText}"
-                                   Foreground="{StaticResource DangerBrush}"
+                <Button Content="{Binding [settings.tabs.providers], Source={StaticResource Loc}}"
+                        Command="{Binding SelectTabCommand}"
+                        CommandParameter="{x:Static models:SettingsTab.Providers}">
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource EqualityToStyle}">
+                            <Binding Path="SelectedTab"/>
+                            <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                            <Binding Source="{StaticResource StatusPillActive}"/>
+                            <Binding Source="{StaticResource StatusPill}"/>
+                        </MultiBinding>
+                    </Button.Style>
+                </Button>
+
+                <Button Content="{Binding [settings.tabs.advanced], Source={StaticResource Loc}}"
+                        Command="{Binding SelectTabCommand}"
+                        CommandParameter="{x:Static models:SettingsTab.Advanced}">
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource EqualityToStyle}">
+                            <Binding Path="SelectedTab"/>
+                            <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                            <Binding Source="{StaticResource StatusPillActive}"/>
+                            <Binding Source="{StaticResource StatusPill}"/>
+                        </MultiBinding>
+                    </Button.Style>
+                </Button>
+            </WrapPanel>
+
+            <Grid>
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedTab}" Value="{x:Static models:SettingsTab.General}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2.2*"/>
+                    <ColumnDefinition Width="18"/>
+                    <ColumnDefinition Width="1.1*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource ElevatedCard}" Padding="30">
+                    <StackPanel>
+                        <TextBlock Text="{Binding [settings.general.eyebrow], Source={StaticResource Loc}}" Style="{StaticResource PageEyebrowText}"/>
+                        <TextBlock Text="{Binding [settings.general.title], Source={StaticResource Loc}}"
+                                   Style="{StaticResource PageTitleText}"
+                                   FontSize="{StaticResource FontSizeLarge}"
+                                   Margin="0,12,0,0"/>
+                        <TextBlock Text="{Binding [settings.general.description], Source={StaticResource Loc}}"
+                                   Style="{StaticResource BodyText}"
+                                   Margin="0,12,0,0"
                                    TextWrapping="Wrap"/>
-                    </Border>
 
-                    <Border Style="{StaticResource SuccessBanner}"
-                            Margin="0,18,0,0"
-                            Visibility="{Binding StatusMessage, Converter={StaticResource NullToVis}}">
-                        <TextBlock Text="{Binding StatusMessage}"
-                                   Style="{StaticResource BannerText}"
-                                   Foreground="{StaticResource SuccessBrush}"
-                                   TextWrapping="Wrap"/>
-                    </Border>
+                        <Border Style="{StaticResource ErrorBanner}"
+                                Margin="0,18,0,0"
+                                Visibility="{Binding LanguageErrorMessage, Converter={StaticResource NullToVis}}">
+                            <TextBlock Text="{Binding LanguageErrorMessage}"
+                                       Style="{StaticResource BannerText}"
+                                       Foreground="{StaticResource DangerBrush}"
+                                       TextWrapping="Wrap"/>
+                        </Border>
 
-                    <TextBlock Text="TMDB API key" Style="{StaticResource SettingsLabel}" Margin="0,22,0,6"/>
-                    <TextBox Text="{Binding TmdbApiKey, UpdateSourceTrigger=PropertyChanged}"
-                             Style="{StaticResource InputTextBox}"/>
-                    <TextBlock Text="Used for movies, series and anime."
-                               Style="{StaticResource CaptionText}"
-                               Margin="0,6,0,0"/>
+                        <Border Style="{StaticResource SuccessBanner}"
+                                Margin="0,18,0,0"
+                                Visibility="{Binding LanguageStatusMessage, Converter={StaticResource NullToVis}}">
+                            <TextBlock Text="{Binding LanguageStatusMessage}"
+                                       Style="{StaticResource BannerText}"
+                                       Foreground="{StaticResource SuccessBrush}"
+                                       TextWrapping="Wrap"/>
+                        </Border>
 
-                    <TextBlock Text="RAWG API key" Style="{StaticResource SettingsLabel}" Margin="0,18,0,6"/>
-                    <TextBox Text="{Binding RawgApiKey, UpdateSourceTrigger=PropertyChanged}"
-                             Style="{StaticResource InputTextBox}"/>
-                    <TextBlock Text="Used for games."
-                               Style="{StaticResource CaptionText}"
-                               Margin="0,6,0,0"/>
+                        <TextBlock Text="{Binding [settings.general.languageLabel], Source={StaticResource Loc}}" Style="{StaticResource SettingsLabel}" Margin="0,24,0,6"/>
+                        <ComboBox ItemsSource="{Binding LanguageOptions}"
+                                  SelectedValue="{Binding SelectedLanguage}"
+                                  SelectedValuePath="Value"
+                                  Style="{StaticResource InputComboBox}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Label}" Style="{StaticResource BodyText}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
-                        <Button Content="Save Settings"
-                                Command="{Binding SaveCommand}"
-                                Style="{StaticResource AccentButton}"/>
+                        <TextBlock Text="{Binding [settings.general.currentLanguageLabel], Source={StaticResource Loc}}" Style="{StaticResource SettingsLabel}" Margin="0,18,0,6"/>
+                        <Border Style="{StaticResource SurfaceCard}" Padding="16,14">
+                            <TextBlock Text="{Binding CurrentLanguageDisplayName}"
+                                       Style="{StaticResource BodyText}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                            <Button Content="{Binding [settings.general.apply], Source={StaticResource Loc}}"
+                                    Command="{Binding ApplyLanguageCommand}"
+                                    Style="{StaticResource AccentButton}"/>
+                        </StackPanel>
                     </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Column="2">
+                    <Border Style="{StaticResource SurfaceCard}" Padding="22">
+                        <StackPanel>
+                            <TextBlock Text="{Binding [settings.general.runtimeNote], Source={StaticResource Loc}}"
+                                       Style="{StaticResource SectionTitleText}"
+                                       TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding [settings.general.futureImportsNote], Source={StaticResource Loc}}"
+                                       Style="{StaticResource BodyText}"
+                                       Margin="0,10,0,0"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource SurfaceCard}" Padding="22" Margin="0,16,0,0">
+                        <StackPanel>
+                            <TextBlock Text="{Binding [settings.providers.title], Source={StaticResource Loc}}"
+                                       Style="{StaticResource SectionTitleText}"/>
+                            <TextBlock Text="{Binding [settings.providers.description], Source={StaticResource Loc}}"
+                                       Style="{StaticResource BodyText}"
+                                       Margin="0,10,0,0"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
-            </Border>
+            </Grid>
 
-            <Border Style="{StaticResource ElevatedCard}" Padding="28">
-                <StackPanel>
-                    <TextBlock Text="APP UPDATES" Style="{StaticResource PageEyebrowText}"/>
-                    <TextBlock Text="Check for newer releases"
-                               Style="{StaticResource PageTitleText}"
-                               FontSize="{StaticResource FontSizeLarge}"
-                               Margin="0,12,0,0"/>
-                    <TextBlock Text="Use a simple JSON feed to warn you when a newer build is available. This keeps updates lightweight while still giving you a heads-up inside the app."
-                               Style="{StaticResource BodyText}"
-                               Margin="0,12,0,0"
-                               TextWrapping="Wrap"/>
+            <StackPanel>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedTab}" Value="{x:Static models:SettingsTab.Providers}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
 
-                    <TextBlock Text="Current version" Style="{StaticResource SettingsLabel}" Margin="0,22,0,6"/>
-                    <Border Style="{StaticResource SurfaceCard}" Padding="14,12">
-                        <TextBlock Text="{Binding CurrentVersion}"
+                <Border Style="{StaticResource ElevatedCard}" Padding="28">
+                    <StackPanel>
+                        <TextBlock Text="{Binding [settings.providers.eyebrow], Source={StaticResource Loc}}" Style="{StaticResource PageEyebrowText}"/>
+                        <TextBlock Text="{Binding [settings.providers.title], Source={StaticResource Loc}}"
+                                   Style="{StaticResource PageTitleText}"
+                                   FontSize="{StaticResource FontSizeLarge}"
+                                   Margin="0,12,0,0"/>
+                        <TextBlock Text="{Binding [settings.providers.description], Source={StaticResource Loc}}"
                                    Style="{StaticResource BodyText}"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                    </Border>
+                                   Margin="0,12,0,0"
+                                   TextWrapping="Wrap"/>
 
-                    <TextBlock Text="Update feed URL" Style="{StaticResource SettingsLabel}" Margin="0,18,0,6"/>
-                    <TextBox Text="{Binding UpdateFeedUrl, UpdateSourceTrigger=PropertyChanged}"
-                             Style="{StaticResource InputTextBox}"/>
-                    <TextBlock Text="Use an absolute HTTPS URL or a local manifest file path while testing."
-                               Style="{StaticResource CaptionText}"
-                               Margin="0,6,0,0"/>
+                        <Border Style="{StaticResource ErrorBanner}"
+                                Margin="0,18,0,0"
+                                Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVis}}">
+                            <TextBlock Text="{Binding ErrorMessage}"
+                                       Style="{StaticResource BannerText}"
+                                       Foreground="{StaticResource DangerBrush}"
+                                       TextWrapping="Wrap"/>
+                        </Border>
 
-                    <CheckBox IsChecked="{Binding CheckForUpdatesOnStartup}"
-                              Margin="0,18,0,0">
-                        <TextBlock Text="Check for updates on startup"
+                        <Border Style="{StaticResource SuccessBanner}"
+                                Margin="0,18,0,0"
+                                Visibility="{Binding StatusMessage, Converter={StaticResource NullToVis}}">
+                            <TextBlock Text="{Binding StatusMessage}"
+                                       Style="{StaticResource BannerText}"
+                                       Foreground="{StaticResource SuccessBrush}"
+                                       TextWrapping="Wrap"/>
+                        </Border>
+
+                        <Grid Margin="0,22,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Style="{StaticResource SurfaceCard}" Padding="20">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding [settings.providers.tmdbLabel], Source={StaticResource Loc}}" Style="{StaticResource SectionTitleText}"/>
+                                    <TextBlock Text="{Binding [settings.providers.tmdbHint], Source={StaticResource Loc}}"
+                                               Style="{StaticResource CaptionText}"
+                                               Margin="0,8,0,0"
+                                               TextWrapping="Wrap"/>
+                                    <TextBox Text="{Binding TmdbApiKey, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource InputTextBox}"
+                                             Margin="0,16,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Style="{StaticResource SurfaceCard}" Padding="20">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding [settings.providers.rawgLabel], Source={StaticResource Loc}}" Style="{StaticResource SectionTitleText}"/>
+                                    <TextBlock Text="{Binding [settings.providers.rawgHint], Source={StaticResource Loc}}"
+                                               Style="{StaticResource CaptionText}"
+                                               Margin="0,8,0,0"
+                                               TextWrapping="Wrap"/>
+                                    <TextBox Text="{Binding RawgApiKey, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource InputTextBox}"
+                                             Margin="0,16,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                            <Button Content="{Binding [common.saveSettings], Source={StaticResource Loc}}"
+                                    Command="{Binding SaveCommand}"
+                                    Style="{StaticResource AccentButton}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <Grid>
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedTab}" Value="{x:Static models:SettingsTab.Advanced}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="18"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource ElevatedCard}" Padding="28">
+                    <StackPanel>
+                        <TextBlock Text="{Binding [settings.advanced.eyebrow], Source={StaticResource Loc}}" Style="{StaticResource PageEyebrowText}"/>
+                        <TextBlock Text="{Binding [settings.advanced.title], Source={StaticResource Loc}}"
+                                   Style="{StaticResource PageTitleText}"
+                                   FontSize="{StaticResource FontSizeLarge}"
+                                   Margin="0,12,0,0"/>
+                        <TextBlock Text="{Binding [settings.advanced.description], Source={StaticResource Loc}}"
                                    Style="{StaticResource BodyText}"
-                                   VerticalAlignment="Center"/>
-                    </CheckBox>
-
-                    <Border Style="{StaticResource ErrorBanner}"
-                            Margin="0,18,0,0"
-                            Visibility="{Binding UpdateErrorMessage, Converter={StaticResource NullToVis}}">
-                        <TextBlock Text="{Binding UpdateErrorMessage}"
-                                   Style="{StaticResource BannerText}"
-                                   Foreground="{StaticResource DangerBrush}"
+                                   Margin="0,12,0,0"
                                    TextWrapping="Wrap"/>
-                    </Border>
 
-                    <Border Style="{StaticResource SuccessBanner}"
-                            Margin="0,18,0,0"
-                            Visibility="{Binding UpdateStatusMessage, Converter={StaticResource NullToVis}}">
-                        <TextBlock Text="{Binding UpdateStatusMessage}"
-                                   Style="{StaticResource BannerText}"
-                                   Foreground="{StaticResource SuccessBrush}"
-                                   TextWrapping="Wrap"/>
-                    </Border>
+                        <TextBlock Text="{Binding [common.currentVersion], Source={StaticResource Loc}}" Style="{StaticResource SettingsLabel}" Margin="0,22,0,6"/>
+                        <Border Style="{StaticResource SurfaceCard}" Padding="16,14">
+                            <TextBlock Text="{Binding CurrentVersion}"
+                                       Style="{StaticResource BodyText}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
-                        <Button Content="Check Now"
-                                Command="{Binding CheckForUpdatesCommand}"
-                                Style="{StaticResource AccentButton}"/>
-                        <Button Content="Open Download"
-                                Command="{Binding OpenLatestDownloadCommand}"
-                                Style="{StaticResource SecondaryButton}"
-                                Margin="12,0,0,0"/>
-                        <TextBlock Text="Checking the latest feed..."
+                        <TextBlock Text="{Binding [settings.advanced.feedLabel], Source={StaticResource Loc}}" Style="{StaticResource SettingsLabel}" Margin="0,18,0,6"/>
+                        <TextBox Text="{Binding UpdateFeedUrl, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBox}"/>
+                        <TextBlock Text="{Binding [settings.advanced.feedHint], Source={StaticResource Loc}}"
                                    Style="{StaticResource CaptionText}"
-                                   Margin="14,0,0,0"
-                                   VerticalAlignment="Center"
+                                   Margin="0,6,0,0"
+                                   TextWrapping="Wrap"/>
+
+                        <CheckBox IsChecked="{Binding CheckForUpdatesOnStartup}" Margin="0,18,0,0">
+                            <TextBlock Text="{Binding [settings.advanced.checkOnStartup], Source={StaticResource Loc}}"
+                                       Style="{StaticResource BodyText}"
+                                       VerticalAlignment="Center"/>
+                        </CheckBox>
+
+                        <Border Style="{StaticResource ErrorBanner}"
+                                Margin="0,18,0,0"
+                                Visibility="{Binding UpdateErrorMessage, Converter={StaticResource NullToVis}}">
+                            <TextBlock Text="{Binding UpdateErrorMessage}"
+                                       Style="{StaticResource BannerText}"
+                                       Foreground="{StaticResource DangerBrush}"
+                                       TextWrapping="Wrap"/>
+                        </Border>
+
+                        <Border Style="{StaticResource SuccessBanner}"
+                                Margin="0,18,0,0"
+                                Visibility="{Binding UpdateStatusMessage, Converter={StaticResource NullToVis}}">
+                            <TextBlock Text="{Binding UpdateStatusMessage}"
+                                       Style="{StaticResource BannerText}"
+                                       Foreground="{StaticResource SuccessBrush}"
+                                       TextWrapping="Wrap"/>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                            <Button Content="{Binding [common.saveSettings], Source={StaticResource Loc}}"
+                                    Command="{Binding SaveCommand}"
+                                    Style="{StaticResource SecondaryButton}"/>
+                            <Button Content="{Binding [common.checkNow], Source={StaticResource Loc}}"
+                                    Command="{Binding CheckForUpdatesCommand}"
+                                    Style="{StaticResource AccentButton}"
+                                    Margin="12,0,0,0"/>
+                            <Button Content="{Binding [common.openDownload], Source={StaticResource Loc}}"
+                                    Command="{Binding OpenLatestDownloadCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Margin="12,0,0,0"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding [settings.advanced.checking], Source={StaticResource Loc}}"
+                                   Style="{StaticResource CaptionText}"
+                                   Margin="0,12,0,0"
                                    Visibility="{Binding IsCheckingForUpdates, Converter={StaticResource BoolToVis}}"/>
                     </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Column="2">
+                    <Border Style="{StaticResource SurfaceCard}" Padding="22">
+                        <StackPanel>
+                            <TextBlock Text="{Binding [settings.advanced.title], Source={StaticResource Loc}}"
+                                       Style="{StaticResource SectionTitleText}"/>
+                            <TextBlock Text="{Binding [settings.advanced.description], Source={StaticResource Loc}}"
+                                       Style="{StaticResource BodyText}"
+                                       Margin="0,10,0,0"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
-            </Border>
+            </Grid>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

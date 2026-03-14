@@ -45,7 +45,7 @@
 
             <!-- Status filter pills -->
             <WrapPanel Grid.Column="0" VerticalAlignment="Center">
-                <Button Content="All"
+                <Button Content="{Binding [common.all], Source={StaticResource Loc}}"
                         Command="{Binding SetStatusFilterCommand}"
                         CommandParameter="{x:Null}">
                     <Button.Style>
@@ -58,7 +58,7 @@
                     </Button.Style>
                 </Button>
 
-                <Button Content="Plan to Watch"
+                <Button Content="{Binding [status.planToWatch], Source={StaticResource Loc}}"
                         Command="{Binding SetStatusFilterCommand}"
                         CommandParameter="{x:Static models:MediaStatus.PlanToWatch}">
                     <Button.Style>
@@ -71,7 +71,7 @@
                     </Button.Style>
                 </Button>
 
-                <Button Content="Watching"
+                <Button Content="{Binding [status.watching], Source={StaticResource Loc}}"
                         Command="{Binding SetStatusFilterCommand}"
                         CommandParameter="{x:Static models:MediaStatus.Watching}">
                     <Button.Style>
@@ -84,7 +84,7 @@
                     </Button.Style>
                 </Button>
 
-                <Button Content="Completed"
+                <Button Content="{Binding [status.completed], Source={StaticResource Loc}}"
                         Command="{Binding SetStatusFilterCommand}"
                         CommandParameter="{x:Static models:MediaStatus.Completed}">
                     <Button.Style>
@@ -97,7 +97,7 @@
                     </Button.Style>
                 </Button>
 
-                <Button Content="Paused"
+                <Button Content="{Binding [status.paused], Source={StaticResource Loc}}"
                         Command="{Binding SetStatusFilterCommand}"
                         CommandParameter="{x:Static models:MediaStatus.Paused}">
                     <Button.Style>
@@ -110,7 +110,7 @@
                     </Button.Style>
                 </Button>
 
-                <Button Content="Dropped"
+                <Button Content="{Binding [status.dropped], Source={StaticResource Loc}}"
                         Command="{Binding SetStatusFilterCommand}"
                         CommandParameter="{x:Static models:MediaStatus.Dropped}">
                     <Button.Style>
@@ -126,7 +126,7 @@
 
             <!-- Layout toggle -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="Grid"
+                <Button Content="{Binding [common.grid], Source={StaticResource Loc}}"
                         Command="{Binding SetDisplayModeCommand}"
                         CommandParameter="{x:Static models:LibraryDisplayMode.Grid}">
                     <Button.Style>
@@ -139,7 +139,7 @@
                     </Button.Style>
                 </Button>
 
-                <Button Content="List"
+                <Button Content="{Binding [common.list], Source={StaticResource Loc}}"
                         Command="{Binding SetDisplayModeCommand}"
                         CommandParameter="{x:Static models:LibraryDisplayMode.List}">
                     <Button.Style>
@@ -213,7 +213,7 @@
                            Margin="0,8,0,0"
                            TextAlignment="Center"
                            TextWrapping="Wrap"/>
-                <Button Content="+ Add"
+                <Button Content="{Binding [common.add], Source={StaticResource Loc}}"
                         Command="{Binding AddNewCommand}"
                         Style="{StaticResource AccentButton}"
                         Margin="0,20,0,0"
@@ -275,7 +275,7 @@
                                                             ClipToBounds="True">
                                                         <Grid>
                                                             <!-- No cover placeholder -->
-                                                            <TextBlock Text="No cover"
+                                                            <TextBlock Text="{Binding [library.noCover], Source={StaticResource Loc}}"
                                                                        Foreground="{StaticResource TextMutedBrush}"
                                                                        FontSize="12"
                                                                        HorizontalAlignment="Center"

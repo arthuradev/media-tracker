@@ -16,30 +16,59 @@ public class TmdbProvider : IMetadataProvider
 
     private readonly ResilientHttpService _http;
     private readonly AppSettings _settings;
+    private readonly LocalizationService _localization;
     private readonly ILogger<TmdbProvider> _logger;
 
-    private static readonly Dictionary<int, string> GenreMap = new()
-    {
-        {28, "Action"}, {12, "Adventure"}, {16, "Animation"}, {35, "Comedy"},
-        {80, "Crime"}, {99, "Documentary"}, {18, "Drama"}, {10751, "Family"},
-        {14, "Fantasy"}, {36, "History"}, {27, "Horror"}, {10402, "Music"},
-        {9648, "Mystery"}, {10749, "Romance"}, {878, "Sci-Fi"}, {10770, "TV Movie"},
-        {53, "Thriller"}, {10752, "War"}, {37, "Western"},
-        {10759, "Action & Adventure"}, {10762, "Kids"}, {10763, "News"},
-        {10764, "Reality"}, {10765, "Sci-Fi & Fantasy"}, {10766, "Soap"},
-        {10767, "Talk"}, {10768, "War & Politics"}
-    };
+    private static readonly IReadOnlyDictionary<AppLanguage, IReadOnlyDictionary<int, string>> GenreMaps =
+        new Dictionary<AppLanguage, IReadOnlyDictionary<int, string>>
+        {
+            [AppLanguage.English] = new Dictionary<int, string>
+            {
+                {28, "Action"}, {12, "Adventure"}, {16, "Animation"}, {35, "Comedy"},
+                {80, "Crime"}, {99, "Documentary"}, {18, "Drama"}, {10751, "Family"},
+                {14, "Fantasy"}, {36, "History"}, {27, "Horror"}, {10402, "Music"},
+                {9648, "Mystery"}, {10749, "Romance"}, {878, "Sci-Fi"}, {10770, "TV Movie"},
+                {53, "Thriller"}, {10752, "War"}, {37, "Western"},
+                {10759, "Action & Adventure"}, {10762, "Kids"}, {10763, "News"},
+                {10764, "Reality"}, {10765, "Sci-Fi & Fantasy"}, {10766, "Soap"},
+                {10767, "Talk"}, {10768, "War & Politics"}
+            },
+            [AppLanguage.PortugueseBrazil] = new Dictionary<int, string>
+            {
+                {28, "Acao"}, {12, "Aventura"}, {16, "Animacao"}, {35, "Comedia"},
+                {80, "Crime"}, {99, "Documentario"}, {18, "Drama"}, {10751, "Familia"},
+                {14, "Fantasia"}, {36, "Historia"}, {27, "Terror"}, {10402, "Musica"},
+                {9648, "Misterio"}, {10749, "Romance"}, {878, "Ficcao cientifica"}, {10770, "Filme para TV"},
+                {53, "Suspense"}, {10752, "Guerra"}, {37, "Faroeste"},
+                {10759, "Acao e aventura"}, {10762, "Infantil"}, {10763, "Noticias"},
+                {10764, "Reality"}, {10765, "Ficcao cientifica e fantasia"}, {10766, "Novela"},
+                {10767, "Talk show"}, {10768, "Guerra e politica"}
+            },
+            [AppLanguage.Spanish] = new Dictionary<int, string>
+            {
+                {28, "Accion"}, {12, "Aventura"}, {16, "Animacion"}, {35, "Comedia"},
+                {80, "Crimen"}, {99, "Documental"}, {18, "Drama"}, {10751, "Familia"},
+                {14, "Fantasia"}, {36, "Historia"}, {27, "Terror"}, {10402, "Musica"},
+                {9648, "Misterio"}, {10749, "Romance"}, {878, "Ciencia ficcion"}, {10770, "Pelicula de TV"},
+                {53, "Suspenso"}, {10752, "Belica"}, {37, "Oeste"},
+                {10759, "Accion y aventura"}, {10762, "Infantil"}, {10763, "Noticias"},
+                {10764, "Reality"}, {10765, "Ciencia ficcion y fantasia"}, {10766, "Telenovela"},
+                {10767, "Talk show"}, {10768, "Guerra y politica"}
+            }
+        };
 
     public string Name => "TMDB";
     public bool IsConfigured => !string.IsNullOrWhiteSpace(ApiKey);
-    public string ConfigurationHint => "Add a TMDB API key in Settings to search movies, series and anime.";
+    public string ConfigurationHint => _localization.Get("provider.tmdb.configHint");
     public MediaType[] SupportedTypes => [MediaType.Movie, MediaType.Series, MediaType.Anime];
     private string ApiKey => _settings.TmdbApiKey?.Trim() ?? string.Empty;
+    private string LanguageCode => _localization.CurrentLanguageCode;
 
-    public TmdbProvider(ResilientHttpService http, AppSettings settings, ILogger<TmdbProvider> logger)
+    public TmdbProvider(ResilientHttpService http, AppSettings settings, LocalizationService localization, ILogger<TmdbProvider> logger)
     {
         _http = http;
         _settings = settings;
+        _localization = localization;
         _logger = logger;
     }
 
@@ -52,8 +81,8 @@ public class TmdbProvider : IMetadataProvider
         {
             if (mediaType == MediaType.Movie)
             {
-                string url = $"{BaseUrl}/search/movie?api_key={ApiKey}&query={Uri.EscapeDataString(query)}&language=pt-BR";
-                string cacheKey = $"tmdb:search:movie:{query.Trim().ToLowerInvariant()}";
+                string url = $"{BaseUrl}/search/movie?api_key={ApiKey}&query={Uri.EscapeDataString(query)}&language={LanguageCode}";
+                string cacheKey = $"tmdb:search:movie:{LanguageCode}:{query.Trim().ToLowerInvariant()}";
                 var response = await _http.GetJsonAsync<TmdbSearchResponse<TmdbMovie>>(url, cacheKey, SearchCacheDuration, ct);
 
                 return response?.Results?.Select(m => new SearchResult
@@ -72,8 +101,8 @@ public class TmdbProvider : IMetadataProvider
                 }).ToList() ?? [];
             }
 
-            string tvUrl = $"{BaseUrl}/search/tv?api_key={ApiKey}&query={Uri.EscapeDataString(query)}&language=pt-BR";
-            string tvCacheKey = $"tmdb:search:tv:{query.Trim().ToLowerInvariant()}";
+            string tvUrl = $"{BaseUrl}/search/tv?api_key={ApiKey}&query={Uri.EscapeDataString(query)}&language={LanguageCode}";
+            string tvCacheKey = $"tmdb:search:tv:{LanguageCode}:{query.Trim().ToLowerInvariant()}";
             var tvResponse = await _http.GetJsonAsync<TmdbSearchResponse<TmdbTv>>(tvUrl, tvCacheKey, SearchCacheDuration, ct);
 
             var results = tvResponse?.Results?.Select(t => new SearchResult
@@ -111,10 +140,10 @@ public class TmdbProvider : IMetadataProvider
         {
             if (mediaType == MediaType.Movie)
             {
-                string url = $"{BaseUrl}/movie/{externalId}?api_key={ApiKey}&language=pt-BR";
+                string url = $"{BaseUrl}/movie/{externalId}?api_key={ApiKey}&language={LanguageCode}";
                 var movie = await _http.GetJsonAsync<TmdbMovieDetail>(
                     url,
-                    $"tmdb:detail:movie:{externalId}",
+                    $"tmdb:detail:movie:{LanguageCode}:{externalId}",
                     DetailCacheDuration,
                     ct);
 
@@ -138,10 +167,10 @@ public class TmdbProvider : IMetadataProvider
                 };
             }
 
-            string tvUrl = $"{BaseUrl}/tv/{externalId}?api_key={ApiKey}&language=pt-BR";
+            string tvUrl = $"{BaseUrl}/tv/{externalId}?api_key={ApiKey}&language={LanguageCode}";
             var tv = await _http.GetJsonAsync<TmdbTvDetail>(
                 tvUrl,
-                $"tmdb:detail:tv:{externalId}",
+                $"tmdb:detail:tv:{LanguageCode}:{externalId}",
                 DetailCacheDuration,
                 ct);
 
@@ -179,10 +208,10 @@ public class TmdbProvider : IMetadataProvider
 
         try
         {
-            string url = $"{BaseUrl}/tv/{externalId}/season/{seasonNumber}?api_key={ApiKey}&language=pt-BR";
+            string url = $"{BaseUrl}/tv/{externalId}/season/{seasonNumber}?api_key={ApiKey}&language={LanguageCode}";
             var season = await _http.GetJsonAsync<TmdbSeason>(
                 url,
-                $"tmdb:episodes:{externalId}:season:{seasonNumber}",
+                $"tmdb:episodes:{LanguageCode}:{externalId}:season:{seasonNumber}",
                 EpisodeCacheDuration,
                 ct);
 
@@ -219,8 +248,16 @@ public class TmdbProvider : IMetadataProvider
     private static string? BackdropUrl(string? path) =>
         path is not null ? $"{ImageBaseUrl}/w780{path}" : null;
 
-    private static string MapGenres(int[]? ids) =>
-        ids is null ? string.Empty : string.Join(", ", ids.Where(GenreMap.ContainsKey).Select(id => GenreMap[id]));
+    private string MapGenres(int[]? ids)
+    {
+        if (ids is null)
+            return string.Empty;
+
+        if (!GenreMaps.TryGetValue(_localization.CurrentLanguage, out var genreMap))
+            genreMap = GenreMaps[AppLanguage.English];
+
+        return string.Join(", ", ids.Where(genreMap.ContainsKey).Select(id => genreMap[id]));
+    }
 
     private class TmdbSearchResponse<T>
     {

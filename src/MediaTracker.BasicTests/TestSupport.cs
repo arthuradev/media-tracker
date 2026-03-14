@@ -11,11 +11,18 @@ namespace MediaTracker.BasicTests;
 
 internal static class TestServices
 {
-    public static AppUpdateService CreateUpdateService()
+    public static LocalizationService CreateLocalizationService(AppSettings? settings = null)
     {
+        settings ??= new AppSettings { PreferredLanguage = AppLanguage.English };
+        return new LocalizationService(settings);
+    }
+
+    public static AppUpdateService CreateUpdateService(AppSettings? settings = null, LocalizationService? localization = null)
+    {
+        localization ??= CreateLocalizationService(settings);
         var cache = new MemoryCache(new MemoryCacheOptions());
         var resilientHttp = new ResilientHttpService(new HttpClient(), cache, new FakeLogger<ResilientHttpService>());
-        return new AppUpdateService(resilientHttp, new FakeLogger<AppUpdateService>());
+        return new AppUpdateService(resilientHttp, localization, new FakeLogger<AppUpdateService>());
     }
 }
 

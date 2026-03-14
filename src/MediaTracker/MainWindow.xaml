@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:MediaTracker.ViewModels"
         xmlns:conv="clr-namespace:MediaTracker.Converters"
+        xmlns:models="clr-namespace:MediaTracker.Models"
         mc:Ignorable="d"
         Title="Media Tracker"
         Height="900"
@@ -60,8 +61,8 @@
                 <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
-                            CommandParameter="Settings"
-                            Content="Settings"
+                            CommandParameter="{x:Static models:AppSection.Settings}"
+                            Content="{Binding [nav.settings], Source={StaticResource Loc}}"
                             FontSize="13"
                             Foreground="{StaticResource TextMutedBrush}"/>
                 </StackPanel>
@@ -69,7 +70,7 @@
                 <!-- Top: brand + navigation -->
                 <StackPanel>
                     <!-- Brand -->
-                    <TextBlock Text="Vault"
+                    <TextBlock Text="{Binding [app.brand], Source={StaticResource Loc}}"
                                FontFamily="{StaticResource DefaultFont}"
                                FontSize="18"
                                FontWeight="SemiBold"
@@ -78,13 +79,13 @@
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
-                            CommandParameter="Home"
-                            Content="Home"/>
+                            CommandParameter="{x:Static models:AppSection.Home}"
+                            Content="{Binding [nav.home], Source={StaticResource Loc}}"/>
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
-                            CommandParameter="Library"
-                            Content="Library"/>
+                            CommandParameter="{x:Static models:AppSection.Library}"
+                            Content="{Binding [nav.library], Source={StaticResource Loc}}"/>
 
                     <!-- Separator -->
                     <Border Height="1"
@@ -92,29 +93,29 @@
                             Margin="12,12,12,8"/>
 
                     <!-- Category label -->
-                    <TextBlock Text="CATEGORIES"
+                    <TextBlock Text="{Binding [nav.categories], Source={StaticResource Loc}}"
                                Style="{StaticResource PageEyebrowText}"
                                Margin="12,4,0,8"/>
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
-                            CommandParameter="Movies"
-                            Content="Movies"/>
+                            CommandParameter="{x:Static models:AppSection.Movies}"
+                            Content="{Binding [nav.movies], Source={StaticResource Loc}}"/>
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
-                            CommandParameter="Series"
-                            Content="Series"/>
+                            CommandParameter="{x:Static models:AppSection.Series}"
+                            Content="{Binding [nav.series], Source={StaticResource Loc}}"/>
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
-                            CommandParameter="Anime"
-                            Content="Anime"/>
+                            CommandParameter="{x:Static models:AppSection.Anime}"
+                            Content="{Binding [nav.anime], Source={StaticResource Loc}}"/>
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
-                            CommandParameter="Games"
-                            Content="Games"/>
+                            CommandParameter="{x:Static models:AppSection.Games}"
+                            Content="{Binding [nav.games], Source={StaticResource Loc}}"/>
 
                     <!-- Separator -->
                     <Border Height="1"
@@ -123,8 +124,8 @@
 
                     <Button Style="{StaticResource NavButton}"
                             Command="{Binding NavigateToCommand}"
-                            CommandParameter="Favorites"
-                            Content="Favorites"/>
+                            CommandParameter="{x:Static models:AppSection.Favorites}"
+                            Content="{Binding [nav.favorites], Source={StaticResource Loc}}"/>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -154,7 +155,7 @@
 
                     <!-- Section title -->
                     <TextBlock Grid.Column="0"
-                               Text="{Binding CurrentSection}"
+                               Text="{Binding CurrentSectionTitle}"
                                Style="{StaticResource PageTitleText}"/>
 
                     <!-- Item count subtitle -->
@@ -171,6 +172,7 @@
                              Margin="0,0,12,0"
                              VerticalAlignment="Center"
                              Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                             Tag="{Binding [shell.searchPlaceholder], Source={StaticResource Loc}}"
                              IsVisibleChanged="OnLibrarySearchVisible">
                         <TextBox.Style>
                             <Style TargetType="TextBox" BasedOn="{StaticResource SearchBox}">
@@ -192,7 +194,7 @@
                     <Button Grid.Column="4"
                             VerticalAlignment="Center"
                             Command="{Binding ToggleInlineSearchCommand}"
-                            Content="+ Add">
+                            Content="{Binding [common.add], Source={StaticResource Loc}}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource AccentButton}">
                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -237,6 +239,7 @@
                         <TextBox x:Name="InlineSearchBox"
                                  Grid.Column="0"
                                  Style="{StaticResource InlineSearchBox}"
+                                 Tag="{Binding [shell.inlineSearchPlaceholder], Source={StaticResource Loc}}"
                                  Text="{Binding InlineSearchQuery, UpdateSourceTrigger=PropertyChanged}"
                                  PreviewKeyDown="OnInlineSearchKeyDown"
                                  IsVisibleChanged="OnInlineSearchVisible"/>
@@ -244,7 +247,7 @@
                         <Button Grid.Column="1"
                                 Style="{StaticResource GhostButton}"
                                 Command="{Binding CloseInlineSearchCommand}"
-                                Content="esc"
+                                Content="{Binding [common.esc], Source={StaticResource Loc}}"
                                 Margin="8,0,0,0"
                                 VerticalAlignment="Center"/>
 
@@ -265,7 +268,7 @@
                                     MaxHeight="440"
                                     Padding="8">
                                 <StackPanel>
-                                    <TextBlock Text="searching..."
+                                    <TextBlock Text="{Binding [common.searching], Source={StaticResource Loc}}"
                                                Style="{StaticResource CaptionText}"
                                                Margin="10,6,10,8"
                                                Visibility="{Binding IsInlineSearching, Converter={StaticResource BoolToVis}}"/>
@@ -276,7 +279,7 @@
                                                Margin="10,6,10,8"
                                                Visibility="{Binding InlineError, Converter={StaticResource NullToVis}}"/>
 
-                                    <TextBlock Text="no results found."
+                                    <TextBlock Text="{Binding [common.noResults], Source={StaticResource Loc}}"
                                                Style="{StaticResource CaptionText}"
                                                Margin="10,6,10,8"
                                                Visibility="{Binding ShowInlineEmpty, Converter={StaticResource BoolToVis}}"/>
@@ -346,7 +349,7 @@
                                         </ListBox.ItemTemplate>
                                     </ListBox>
 
-                                    <TextBlock Text="importing..."
+                                    <TextBlock Text="{Binding [common.importing], Source={StaticResource Loc}}"
                                                Style="{StaticResource CaptionText}"
                                                Foreground="{StaticResource AccentBrush}"
                                                Margin="10,6,10,8"
@@ -356,7 +359,7 @@
 
                                     <Button Style="{StaticResource GhostButton}"
                                             Command="{Binding InlineManualAddCommand}"
-                                            Content="Can't find it? Add manually"
+                                            Content="{Binding [shell.manualAdd], Source={StaticResource Loc}}"
                                             HorizontalAlignment="Left"
                                             Margin="4,0,0,2"/>
                                 </StackPanel>
@@ -385,13 +388,13 @@
                                VerticalAlignment="Center"/>
 
                     <Button Grid.Column="1"
-                            Content="download"
+                            Content="{Binding [common.download], Source={StaticResource Loc}}"
                             Command="{Binding OpenUpdateDownloadCommand}"
                             Style="{StaticResource AccentButton}"
                             Margin="0,0,8,0"/>
 
                     <Button Grid.Column="2"
-                            Content="dismiss"
+                            Content="{Binding [common.dismiss], Source={StaticResource Loc}}"
                             Command="{Binding DismissUpdateBannerCommand}"
                             Style="{StaticResource GhostButton}"/>
                 </Grid>

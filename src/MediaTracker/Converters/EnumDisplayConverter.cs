@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows.Data;
 using MediaTracker.Models;
+using MediaTracker.Services;
 
 namespace MediaTracker.Converters;
 
@@ -10,11 +11,11 @@ public class MediaStatusDisplayConverter : IValueConverter
     {
         return value is MediaStatus status ? status switch
         {
-            MediaStatus.PlanToWatch => "Plan to Watch",
-            MediaStatus.Watching => "Watching",
-            MediaStatus.Completed => "Completed",
-            MediaStatus.Paused => "Paused",
-            MediaStatus.Dropped => "Dropped",
+            MediaStatus.PlanToWatch => LocalizationService.Current?.GetMediaStatusLabel(MediaStatus.PlanToWatch) ?? "Plan to Watch",
+            MediaStatus.Watching => LocalizationService.Current?.GetMediaStatusLabel(MediaStatus.Watching) ?? "Watching",
+            MediaStatus.Completed => LocalizationService.Current?.GetMediaStatusLabel(MediaStatus.Completed) ?? "Completed",
+            MediaStatus.Paused => LocalizationService.Current?.GetMediaStatusLabel(MediaStatus.Paused) ?? "Paused",
+            MediaStatus.Dropped => LocalizationService.Current?.GetMediaStatusLabel(MediaStatus.Dropped) ?? "Dropped",
             _ => value.ToString() ?? string.Empty
         } : string.Empty;
     }
@@ -29,10 +30,10 @@ public class MediaTypeDisplayConverter : IValueConverter
     {
         return value is MediaType type ? type switch
         {
-            MediaType.Series => "Series",
-            MediaType.Anime => "Anime",
-            MediaType.Movie => "Movie",
-            MediaType.Game => "Game",
+            MediaType.Series => LocalizationService.Current?.GetMediaTypeLabel(MediaType.Series) ?? "Series",
+            MediaType.Anime => LocalizationService.Current?.GetMediaTypeLabel(MediaType.Anime) ?? "Anime",
+            MediaType.Movie => LocalizationService.Current?.GetMediaTypeLabel(MediaType.Movie) ?? "Movie",
+            MediaType.Game => LocalizationService.Current?.GetMediaTypeLabel(MediaType.Game) ?? "Game",
             _ => value.ToString() ?? string.Empty
         } : string.Empty;
     }
@@ -47,11 +48,11 @@ public class CompletionStateDisplayConverter : IValueConverter
     {
         return value is CompletionState state ? state switch
         {
-            CompletionState.NotStarted => "Not Started",
-            CompletionState.InProgress => "In Progress",
-            CompletionState.Completed => "Completed",
-            CompletionState.HundredPercent => "100% Complete",
-            CompletionState.Abandoned => "Abandoned",
+            CompletionState.NotStarted => LocalizationService.Current?.GetCompletionStateLabel(CompletionState.NotStarted) ?? "Not Started",
+            CompletionState.InProgress => LocalizationService.Current?.GetCompletionStateLabel(CompletionState.InProgress) ?? "In Progress",
+            CompletionState.Completed => LocalizationService.Current?.GetCompletionStateLabel(CompletionState.Completed) ?? "Completed",
+            CompletionState.HundredPercent => LocalizationService.Current?.GetCompletionStateLabel(CompletionState.HundredPercent) ?? "100% Complete",
+            CompletionState.Abandoned => LocalizationService.Current?.GetCompletionStateLabel(CompletionState.Abandoned) ?? "Abandoned",
             _ => value.ToString() ?? string.Empty
         } : string.Empty;
     }
@@ -90,7 +91,7 @@ public class ScoreToStarsConverter : IValueConverter
         if (value is int score and > 0)
             return $"{score}/10";
 
-        return "Not rated";
+        return LocalizationService.Current?.Get("score.notRated") ?? "Not rated";
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

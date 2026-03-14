@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MediaTracker.Models;
+using MediaTracker.Services;
 
 namespace MediaTracker.ViewModels;
 
@@ -34,6 +35,7 @@ public partial class MediaCardViewModel : ObservableObject
 
     public static MediaCardViewModel FromModel(MediaItem item)
     {
+        var localization = LocalizationService.Current;
         var vm = new MediaCardViewModel
         {
             Id = item.Id,
@@ -48,8 +50,8 @@ public partial class MediaCardViewModel : ObservableObject
 
         vm.ProgressText = item.MediaType switch
         {
-            Models.MediaType.Movie => item.Status == MediaStatus.Completed ? "Watched" : "",
-            Models.MediaType.Game => FormatGameProgress(item),
+            Models.MediaType.Movie => item.Status == MediaStatus.Completed ? localization?.Get("progress.movie.watched") ?? "Watched" : string.Empty,
+            Models.MediaType.Game => FormatGameProgress(item, localization),
             _ => FormatEpisodeProgress(item)
         };
 
@@ -59,23 +61,23 @@ public partial class MediaCardViewModel : ObservableObject
     private static string FormatEpisodeProgress(MediaItem item)
     {
         if (item.TotalEpisodes is null or 0)
-            return "";
+            return string.Empty;
 
         var watched = item.Episodes?.Count(e => e.IsWatched) ?? 0;
         return watched == item.TotalEpisodes
-            ? "Completed"
-            : $"{watched}/{item.TotalEpisodes} watched";
+            ? LocalizationService.Current?.Get("status.completed") ?? "Completed"
+            : (LocalizationService.Current?.Format("progress.episodesWatched", watched, item.TotalEpisodes) ?? $"{watched}/{item.TotalEpisodes} watched");
     }
 
-    private static string FormatGameProgress(MediaItem item)
+    private static string FormatGameProgress(MediaItem item, LocalizationService? localization)
     {
         return item.GameProgress?.CompletionState switch
         {
-            Models.CompletionState.NotStarted => "Not started",
-            Models.CompletionState.InProgress => "In progress",
-            Models.CompletionState.Completed => "Completed",
-            Models.CompletionState.HundredPercent => "100% complete",
-            Models.CompletionState.Abandoned => "Abandoned",
+            Models.CompletionState.NotStarted => localization?.GetCompletionStateLabel(Models.CompletionState.NotStarted) ?? "Not started",
+            Models.CompletionState.InProgress => localization?.GetCompletionStateLabel(Models.CompletionState.InProgress) ?? "In progress",
+            Models.CompletionState.Completed => localization?.GetCompletionStateLabel(Models.CompletionState.Completed) ?? "Completed",
+            Models.CompletionState.HundredPercent => localization?.GetCompletionStateLabel(Models.CompletionState.HundredPercent) ?? "100% complete",
+            Models.CompletionState.Abandoned => localization?.GetCompletionStateLabel(Models.CompletionState.Abandoned) ?? "Abandoned",
             _ => string.Empty
         };
     }

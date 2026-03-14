@@ -1,4 +1,6 @@
 using MediaTracker.Services;
+using MediaTracker.Models;
+using System.Globalization;
 
 namespace MediaTracker.BasicTests;
 
@@ -16,7 +18,8 @@ public sealed class AppSettingsTests
                 TmdbApiKey = "tmdb-secret",
                 RawgApiKey = "rawg-secret",
                 UpdateFeedUrl = "https://example.test/feed.json",
-                CheckForUpdatesOnStartup = false
+                CheckForUpdatesOnStartup = false,
+                PreferredLanguage = AppLanguage.Spanish
             };
 
             settings.Save(settingsPath);
@@ -27,12 +30,13 @@ public sealed class AppSettingsTests
             Assert.Contains("TmdbApiKeyProtected", json, StringComparison.Ordinal);
             Assert.Contains("RawgApiKeyProtected", json, StringComparison.Ordinal);
 
-            var loaded = AppSettings.Load(settingsPath);
+            var loaded = AppSettings.Load(settingsPath, CultureInfo.GetCultureInfo("en-US"));
 
             Assert.Equal("tmdb-secret", loaded.TmdbApiKey);
             Assert.Equal("rawg-secret", loaded.RawgApiKey);
             Assert.Equal("https://example.test/feed.json", loaded.UpdateFeedUrl);
             Assert.False(loaded.CheckForUpdatesOnStartup);
+            Assert.Equal(AppLanguage.Spanish, loaded.PreferredLanguage);
             Assert.False(loaded.HasUnreadableSecrets);
         }
         finally
@@ -65,6 +69,7 @@ public sealed class AppSettingsTests
             Assert.Equal("legacy-rawg", loaded.RawgApiKey);
             Assert.Equal("https://example.test/legacy-feed.json", loaded.UpdateFeedUrl);
             Assert.True(loaded.CheckForUpdatesOnStartup);
+            Assert.Equal(AppLanguage.English, loaded.PreferredLanguage);
             Assert.False(loaded.HasUnreadableSecrets);
 
             loaded.Save(settingsPath);
@@ -74,6 +79,60 @@ public sealed class AppSettingsTests
             Assert.DoesNotContain("legacy-rawg", migratedJson);
             Assert.Contains("TmdbApiKeyProtected", migratedJson, StringComparison.Ordinal);
             Assert.Contains("RawgApiKeyProtected", migratedJson, StringComparison.Ordinal);
+        }
+        finally
+        {
+            DeleteSettingsFile(settingsPath);
+        }
+    }
+
+    [Fact]
+    public void LoadInfersPreferredLanguageFromSupportedCultureWhenMissing()
+    {
+        string settingsPath = CreateSettingsPath();
+
+        try
+        {
+            File.WriteAllText(
+                settingsPath,
+                """
+                {
+                  "version": 3,
+                  "updateFeedUrl": "https://example.test/feed.json",
+                  "checkForUpdatesOnStartup": true
+                }
+                """);
+
+            var loaded = AppSettings.Load(settingsPath, CultureInfo.GetCultureInfo("pt-BR"));
+
+            Assert.Equal(AppLanguage.PortugueseBrazil, loaded.PreferredLanguage);
+        }
+        finally
+        {
+            DeleteSettingsFile(settingsPath);
+        }
+    }
+
+    [Fact]
+    public void LoadFallsBackToEnglishForUnsupportedCultureWhenMissing()
+    {
+        string settingsPath = CreateSettingsPath();
+
+        try
+        {
+            File.WriteAllText(
+                settingsPath,
+                """
+                {
+                  "version": 3,
+                  "updateFeedUrl": "https://example.test/feed.json",
+                  "checkForUpdatesOnStartup": true
+                }
+                """);
+
+            var loaded = AppSettings.Load(settingsPath, CultureInfo.GetCultureInfo("fr-FR"));
+
+            Assert.Equal(AppLanguage.English, loaded.PreferredLanguage);
         }
         finally
         {

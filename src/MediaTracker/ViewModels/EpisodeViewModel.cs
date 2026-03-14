@@ -1,5 +1,7 @@
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MediaTracker.Models;
+using MediaTracker.Services;
 
 namespace MediaTracker.ViewModels;
 
@@ -26,6 +28,8 @@ public partial class EpisodeViewModel : ObservableObject
     [ObservableProperty]
     private string? _airDate;
 
+    public string DisplayTitle => LocalizationService.Current?.Format("episodes.episodePrefix", EpisodeNumber) ?? $"Episode {EpisodeNumber}";
+
     public static EpisodeViewModel FromModel(Episode ep) => new()
     {
         Id = ep.Id,
@@ -34,6 +38,8 @@ public partial class EpisodeViewModel : ObservableObject
         Title = ep.Title,
         IsWatched = ep.IsWatched,
         UserScore = ep.UserScore,
-        AirDate = ep.AirDate?.ToString("dd/MM/yyyy")
+        AirDate = ep.AirDate?.ToString(
+            LocalizationService.Current?.CurrentCulture.DateTimeFormat.ShortDatePattern ?? CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern,
+            LocalizationService.Current?.CurrentCulture ?? CultureInfo.CurrentCulture)
     };
 }

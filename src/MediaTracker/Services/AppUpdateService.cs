@@ -13,13 +13,16 @@ public sealed class AppUpdateService
     };
 
     private readonly ResilientHttpService _httpService;
+    private readonly LocalizationService _localization;
     private readonly ILogger<AppUpdateService> _logger;
 
     public AppUpdateService(
         ResilientHttpService httpService,
+        LocalizationService localization,
         ILogger<AppUpdateService> logger)
     {
         _httpService = httpService;
+        _localization = localization;
         _logger = logger;
     }
 
@@ -38,7 +41,7 @@ public sealed class AppUpdateService
         {
             return AppUpdateCheckResult.Failure(
                 currentVersion,
-                "Set an update feed URL first.");
+                _localization.Get("update.feedRequired"));
         }
 
         string normalizedFeedLocation = feedLocation.Trim();
@@ -51,14 +54,14 @@ public sealed class AppUpdateService
             {
                 return AppUpdateCheckResult.Failure(
                     currentVersion,
-                    "Could not reach the update feed right now.");
+                    _localization.Get("update.feedUnavailable"));
             }
 
             if (!AppVersionHelper.TryParseComparableVersion(manifest.Version, out _))
             {
                 return AppUpdateCheckResult.Failure(
                     currentVersion,
-                    "The update feed returned an invalid version.");
+                    _localization.Get("update.invalidVersion"));
             }
 
             string? downloadLocation = ResolveDownloadLocation(normalizedFeedLocation, manifest.DownloadUrl);
@@ -67,8 +70,8 @@ public sealed class AppUpdateService
             if (AppVersionHelper.IsNewerVersion(currentVersion, latestVersion))
             {
                 string message = string.IsNullOrWhiteSpace(downloadLocation)
-                    ? $"Version {latestVersion} is available. Add a download link to the feed to open it from the app."
-                    : $"Version {latestVersion} is available. You are currently on {currentVersion}.";
+                    ? _localization.Format("update.availableWithoutDownload", latestVersion)
+                    : _localization.Format("update.availableWithDownload", latestVersion, currentVersion);
 
                 return AppUpdateCheckResult.UpdateAvailable(
                     currentVersion,
@@ -81,7 +84,7 @@ public sealed class AppUpdateService
             return AppUpdateCheckResult.UpToDate(
                 currentVersion,
                 latestVersion,
-                $"You're already on the latest version ({currentVersion}).");
+                _localization.Format("update.upToDate", currentVersion));
         }
         catch (Exception ex)
         {
@@ -89,7 +92,7 @@ public sealed class AppUpdateService
 
             return AppUpdateCheckResult.Failure(
                 currentVersion,
-                "Could not check for updates right now.");
+                _localization.Get("update.checkFailed"));
         }
     }
 
