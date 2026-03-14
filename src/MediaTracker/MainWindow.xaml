@@ -55,20 +55,14 @@
         <!-- ═══════════════════════════════════════════════════════ -->
         <Border Grid.Column="0"
                 Background="{StaticResource SidebarBrush}">
-            <DockPanel Margin="16,16,16,12">
-
-                <!-- Bottom: settings icon -->
-                <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
-                    <Button Style="{StaticResource NavButton}"
-                            Command="{Binding NavigateToCommand}"
-                            CommandParameter="{x:Static models:AppSection.Settings}"
-                            Content="{Binding [nav.settings], Source={StaticResource Loc}}"
-                            FontSize="13"
-                            Foreground="{StaticResource TextMutedBrush}"/>
-                </StackPanel>
+            <Grid Margin="16,16,16,12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
                 <!-- Top: brand + navigation -->
-                <StackPanel>
+                <StackPanel Grid.Row="0">
                     <!-- Brand -->
                     <TextBlock Text="{Binding [app.brand], Source={StaticResource Loc}}"
                                FontFamily="{StaticResource DefaultFont}"
@@ -127,7 +121,16 @@
                             CommandParameter="{x:Static models:AppSection.Favorites}"
                             Content="{Binding [nav.favorites], Source={StaticResource Loc}}"/>
                 </StackPanel>
-            </DockPanel>
+
+                <Button Grid.Row="1"
+                        Style="{StaticResource NavButton}"
+                        Command="{Binding NavigateToCommand}"
+                        CommandParameter="{x:Static models:AppSection.Settings}"
+                        Content="{Binding [nav.settings], Source={StaticResource Loc}}"
+                        FontSize="13"
+                        Foreground="{StaticResource TextMutedBrush}"
+                        Margin="0,16,0,0"/>
+            </Grid>
         </Border>
 
         <!-- ═══════════════════════════════════════════════════════ -->

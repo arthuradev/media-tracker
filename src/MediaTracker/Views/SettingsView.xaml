@@ -210,6 +210,8 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="18"/>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
                             <Border Grid.Column="0" Style="{StaticResource SurfaceCard}" Padding="20">
@@ -233,6 +235,19 @@
                                                Margin="0,8,0,0"
                                                TextWrapping="Wrap"/>
                                     <TextBox Text="{Binding RawgApiKey, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource InputTextBox}"
+                                             Margin="0,16,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="4" Style="{StaticResource SurfaceCard}" Padding="20">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding [settings.providers.deepLLabel], Source={StaticResource Loc}}" Style="{StaticResource SectionTitleText}"/>
+                                    <TextBlock Text="{Binding [settings.providers.deepLHint], Source={StaticResource Loc}}"
+                                               Style="{StaticResource CaptionText}"
+                                               Margin="0,8,0,0"
+                                               TextWrapping="Wrap"/>
+                                    <TextBox Text="{Binding DeepLApiKey, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource InputTextBox}"
                                              Margin="0,16,0,0"/>
                                 </StackPanel>

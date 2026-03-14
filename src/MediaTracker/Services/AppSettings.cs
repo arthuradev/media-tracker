@@ -22,6 +22,7 @@ public class AppSettings
 
     public string TmdbApiKey { get; set; } = string.Empty;
     public string RawgApiKey { get; set; } = string.Empty;
+    public string DeepLApiKey { get; set; } = string.Empty;
     public string UpdateFeedUrl { get; set; } = string.Empty;
     public bool CheckForUpdatesOnStartup { get; set; } = true;
     public AppLanguage PreferredLanguage { get; set; } = AppLanguageCatalog.InferFromCulture(CultureInfo.CurrentUICulture);
@@ -62,6 +63,7 @@ public class AppSettings
             Version = CurrentFormatVersion,
             TmdbApiKeyProtected = ProtectSecret(TmdbApiKey),
             RawgApiKeyProtected = ProtectSecret(RawgApiKey),
+            DeepLApiKeyProtected = ProtectSecret(DeepLApiKey),
             UpdateFeedUrl = UpdateFeedUrl,
             CheckForUpdatesOnStartup = CheckForUpdatesOnStartup,
             PreferredLanguage = AppLanguageCatalog.GetCultureCode(PreferredLanguage)
@@ -82,6 +84,7 @@ public class AppSettings
         {
             TmdbApiKey = ReadSecret(persisted.TmdbApiKeyProtected, persisted.TmdbApiKey, ref hasUnreadableSecrets),
             RawgApiKey = ReadSecret(persisted.RawgApiKeyProtected, persisted.RawgApiKey, ref hasUnreadableSecrets),
+            DeepLApiKey = ReadSecret(persisted.DeepLApiKeyProtected, persisted.DeepLApiKey, ref hasUnreadableSecrets),
             UpdateFeedUrl = persisted.UpdateFeedUrl ?? string.Empty,
             CheckForUpdatesOnStartup = persisted.CheckForUpdatesOnStartup,
             PreferredLanguage = preferredLanguage,
@@ -156,8 +159,10 @@ public class AppSettings
         public int Version { get; set; } = CurrentFormatVersion;
         public string? TmdbApiKey { get; set; }
         public string? RawgApiKey { get; set; }
+        public string? DeepLApiKey { get; set; }
         public string? TmdbApiKeyProtected { get; set; }
         public string? RawgApiKeyProtected { get; set; }
+        public string? DeepLApiKeyProtected { get; set; }
         public string UpdateFeedUrl { get; set; } = string.Empty;
         public bool CheckForUpdatesOnStartup { get; set; } = true;
         public string? PreferredLanguage { get; set; }

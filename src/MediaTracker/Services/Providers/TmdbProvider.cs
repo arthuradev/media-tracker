@@ -35,14 +35,14 @@ public class TmdbProvider : IMetadataProvider
             },
             [AppLanguage.PortugueseBrazil] = new Dictionary<int, string>
             {
-                {28, "Acao"}, {12, "Aventura"}, {16, "Animacao"}, {35, "Comedia"},
-                {80, "Crime"}, {99, "Documentario"}, {18, "Drama"}, {10751, "Familia"},
-                {14, "Fantasia"}, {36, "Historia"}, {27, "Terror"}, {10402, "Musica"},
-                {9648, "Misterio"}, {10749, "Romance"}, {878, "Ficcao cientifica"}, {10770, "Filme para TV"},
+                {28, "Ação"}, {12, "Aventura"}, {16, "Animação"}, {35, "Comédia"},
+                {80, "Crime"}, {99, "Documentário"}, {18, "Drama"}, {10751, "Família"},
+                {14, "Fantasia"}, {36, "História"}, {27, "Terror"}, {10402, "Música"},
+                {9648, "Mistério"}, {10749, "Romance"}, {878, "Ficção científica"}, {10770, "Filme para TV"},
                 {53, "Suspense"}, {10752, "Guerra"}, {37, "Faroeste"},
-                {10759, "Acao e aventura"}, {10762, "Infantil"}, {10763, "Noticias"},
-                {10764, "Reality"}, {10765, "Ficcao cientifica e fantasia"}, {10766, "Novela"},
-                {10767, "Talk show"}, {10768, "Guerra e politica"}
+                {10759, "Ação e aventura"}, {10762, "Infantil"}, {10763, "Notícias"},
+                {10764, "Reality"}, {10765, "Ficção científica e fantasia"}, {10766, "Novela"},
+                {10767, "Talk show"}, {10768, "Guerra e política"}
             },
             [AppLanguage.Spanish] = new Dictionary<int, string>
             {

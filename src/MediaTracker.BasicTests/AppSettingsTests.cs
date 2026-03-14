@@ -63,7 +63,7 @@ public sealed class AppSettingsTests
                 }
                 """);
 
-            var loaded = AppSettings.Load(settingsPath);
+            var loaded = AppSettings.Load(settingsPath, CultureInfo.GetCultureInfo("en-US"));
 
             Assert.Equal("legacy-tmdb", loaded.TmdbApiKey);
             Assert.Equal("legacy-rawg", loaded.RawgApiKey);

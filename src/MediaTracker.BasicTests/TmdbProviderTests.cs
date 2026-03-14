@@ -41,7 +41,7 @@ public sealed class TmdbProviderTests
         Assert.Contains("language=en-US", requestedUris[0], StringComparison.Ordinal);
         Assert.Contains("language=pt-BR", requestedUris[1], StringComparison.Ordinal);
         Assert.Equal("Action, Adventure", englishResults.Single().Genres);
-        Assert.Equal("Acao, Aventura", portugueseResults.Single().Genres);
+        Assert.Equal("Ação, Aventura", portugueseResults.Single().Genres);
     }
 
     [Fact]
