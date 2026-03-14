@@ -3,6 +3,7 @@ namespace MediaTracker.Services;
 public static class MediaInputValidator
 {
     public static string? ValidateMedia(
+        LocalizationService localization,
         string title,
         int? releaseYear,
         int? userScore,
@@ -11,34 +12,34 @@ public static class MediaInputValidator
         int? runtimeMinutes)
     {
         if (string.IsNullOrWhiteSpace(title))
-            return "Title is required.";
+            return localization.Get("validation.titleRequired");
 
         if (releaseYear is not null)
         {
             int maxYear = DateTime.UtcNow.Year + 1;
             if (releaseYear < 1800 || releaseYear > maxYear)
-                return $"Release year must be between 1800 and {maxYear}.";
+                return localization.Format("validation.releaseYearRange", maxYear);
         }
 
         if (userScore is not null && (userScore < 1 || userScore > 10))
-            return "Your rating must be between 1 and 10.";
+            return localization.Get("validation.ratingRange");
 
         if (totalEpisodes is not null && totalEpisodes < 0)
-            return "Episodes cannot be negative.";
+            return localization.Get("validation.episodesNegative");
 
         if (totalSeasons is not null && totalSeasons < 0)
-            return "Seasons cannot be negative.";
+            return localization.Get("validation.seasonsNegative");
 
         if (runtimeMinutes is not null && runtimeMinutes <= 0)
-            return "Runtime must be greater than zero.";
+            return localization.Get("validation.runtimePositive");
 
         return null;
     }
 
-    public static string? ValidateGameProgress(double? hoursPlayed)
+    public static string? ValidateGameProgress(LocalizationService localization, double? hoursPlayed)
     {
         if (hoursPlayed is not null && hoursPlayed < 0)
-            return "Hours played cannot be negative.";
+            return localization.Get("validation.hoursNegative");
 
         return null;
     }

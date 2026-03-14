@@ -8,6 +8,7 @@ namespace MediaTracker.ViewModels;
 public partial class AddEditMediaViewModel : ObservableObject
 {
     private readonly MediaService _mediaService;
+    private readonly LocalizationService _localization;
     private readonly Action _onSaved;
     private readonly Action _onCancelled;
 
@@ -50,7 +51,7 @@ public partial class AddEditMediaViewModel : ObservableObject
     private int? _runtimeMinutes;
 
     [ObservableProperty]
-    private string _windowTitle = "Add Media";
+    private string _windowTitle = string.Empty;
 
     [ObservableProperty]
     private bool _isSaving;
@@ -61,17 +62,19 @@ public partial class AddEditMediaViewModel : ObservableObject
     public Array MediaTypes => Enum.GetValues<MediaType>();
     public Array MediaStatuses => Enum.GetValues<MediaStatus>();
 
-    public AddEditMediaViewModel(MediaService mediaService, Action onSaved, Action onCancelled)
+    public AddEditMediaViewModel(MediaService mediaService, LocalizationService localization, Action onSaved, Action onCancelled)
     {
         _mediaService = mediaService;
+        _localization = localization;
         _onSaved = onSaved;
         _onCancelled = onCancelled;
+        WindowTitle = _localization.Get("addEdit.addTitle");
     }
 
     public void LoadForEdit(MediaItem item)
     {
         _editingId = item.Id;
-        WindowTitle = "Edit Media";
+        WindowTitle = _localization.Get("addEdit.editTitle");
         Title = item.Title;
         OriginalTitle = item.OriginalTitle;
         MediaType = item.MediaType;
@@ -90,6 +93,7 @@ public partial class AddEditMediaViewModel : ObservableObject
     private async Task SaveAsync()
     {
         ErrorMessage = MediaInputValidator.ValidateMedia(
+            _localization,
             Title,
             ReleaseYear,
             UserScore,
@@ -108,7 +112,7 @@ public partial class AddEditMediaViewModel : ObservableObject
                 var existing = await _mediaService.GetByIdAsync(_editingId.Value);
                 if (existing is null)
                 {
-                    ErrorMessage = "This item could not be loaded for editing.";
+                    ErrorMessage = _localization.Get("addEdit.editMissing");
                     return;
                 }
 
@@ -152,7 +156,7 @@ public partial class AddEditMediaViewModel : ObservableObject
         }
         catch (Exception)
         {
-            ErrorMessage = "Could not save this media item right now.";
+            ErrorMessage = _localization.Get("addEdit.saveError");
         }
         finally
         {

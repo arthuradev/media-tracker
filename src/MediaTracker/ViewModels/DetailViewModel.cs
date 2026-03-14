@@ -10,6 +10,7 @@ public partial class DetailViewModel : ObservableObject
 {
     private readonly MediaService _mediaService;
     private readonly IEnumerable<IMetadataProvider> _providers;
+    private readonly LocalizationService _localization;
     private readonly Action _onBack;
     private readonly Action<MediaItem> _onEdit;
     private readonly Action _onDeleted;
@@ -38,12 +39,14 @@ public partial class DetailViewModel : ObservableObject
     public DetailViewModel(
         MediaService mediaService,
         IEnumerable<IMetadataProvider> providers,
+        LocalizationService localization,
         Action onBack,
         Action<MediaItem> onEdit,
         Action onDeleted)
     {
         _mediaService = mediaService;
         _providers = providers;
+        _localization = localization;
         _onBack = onBack;
         _onEdit = onEdit;
         _onDeleted = onDeleted;
@@ -64,7 +67,7 @@ public partial class DetailViewModel : ObservableObject
             Item = await _mediaService.GetByIdAsync(id);
             if (Item is null)
             {
-                ErrorMessage = "This item could not be found anymore.";
+                ErrorMessage = _localization.Get("detail.loadMissing");
                 return;
             }
 
@@ -75,7 +78,7 @@ public partial class DetailViewModel : ObservableObject
             {
                 var mapping = Item.ProviderMappings.FirstOrDefault();
                 EpisodesViewModel = new EpisodesViewModel(
-                    _mediaService, _providers, Item.Id,
+                    _mediaService, _providers, _localization, Item.Id,
                     mapping?.ExternalId, mapping?.ProviderName,
                     Item.TotalSeasons);
             }
@@ -83,12 +86,12 @@ public partial class DetailViewModel : ObservableObject
             if (IsGame)
             {
                 GameProgressViewModel = new GameProgressViewModel(
-                    _mediaService, Item.Id, Item.GameProgress);
+                    _mediaService, _localization, Item.Id, Item.GameProgress);
             }
         }
         catch (Exception)
         {
-            ErrorMessage = "The details for this item could not be loaded right now.";
+            ErrorMessage = _localization.Get("detail.loadError");
         }
         finally
         {
@@ -117,7 +120,7 @@ public partial class DetailViewModel : ObservableObject
         }
         catch (Exception)
         {
-            ErrorMessage = "This item could not be deleted right now.";
+            ErrorMessage = _localization.Get("detail.deleteError");
         }
     }
 }

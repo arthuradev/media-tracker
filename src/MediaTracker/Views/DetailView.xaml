@@ -26,11 +26,11 @@
                 <!-- Top bar: Back + actions -->
                 <DockPanel Margin="0,0,0,20">
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                        <Button Content="Edit"
+                        <Button Content="{Binding [common.edit], Source={StaticResource Loc}}"
                                 Style="{StaticResource SecondaryButton}"
                                 Command="{Binding EditCommand}"
                                 Margin="0,0,8,0"/>
-                        <Button Content="Delete"
+                        <Button Content="{Binding [common.delete], Source={StaticResource Loc}}"
                                 Style="{StaticResource DangerButton}"
                                 Command="{Binding DeleteCommand}"/>
                     </StackPanel>
@@ -42,7 +42,7 @@
                         <Button.Content>
                             <TextBlock>
                                 <Run Text="&#xE72B; " FontFamily="Segoe MDL2 Assets"/>
-                                <Run Text="Back" FontFamily="{StaticResource DefaultFont}"/>
+                                <Run Text="{Binding [common.back], Source={StaticResource Loc}, Mode=OneWay}" FontFamily="{StaticResource DefaultFont}"/>
                             </TextBlock>
                         </Button.Content>
                     </Button>
@@ -73,7 +73,7 @@
                             CornerRadius="{StaticResource RadiusCover}"
                             ClipToBounds="True">
                         <Grid>
-                            <TextBlock Text="No cover"
+                            <TextBlock Text="{Binding [library.noCover], Source={StaticResource Loc}}"
                                        Foreground="{StaticResource TextMutedBrush}"
                                        FontSize="12"
                                        HorizontalAlignment="Center"
@@ -132,7 +132,7 @@
                                     Margin="0,0,8,8"
                                     Visibility="{Binding Item.UserScore, Converter={StaticResource NullToVis}}">
                                 <StackPanel>
-                                    <TextBlock Text="Rating" Style="{StaticResource CaptionText}"/>
+                                    <TextBlock Text="{Binding [detail.rating], Source={StaticResource Loc}}" Style="{StaticResource CaptionText}"/>
                                     <TextBlock FontSize="18" FontWeight="SemiBold"
                                                Foreground="{StaticResource StatusPausedBrush}"
                                                Margin="0,4,0,0">
@@ -149,7 +149,7 @@
                                     Margin="0,0,8,8"
                                     Visibility="{Binding Item.RuntimeMinutes, Converter={StaticResource NullToVis}}">
                                 <StackPanel>
-                                    <TextBlock Text="Runtime" Style="{StaticResource CaptionText}"/>
+                                    <TextBlock Text="{Binding [detail.runtime], Source={StaticResource Loc}}" Style="{StaticResource CaptionText}"/>
                                     <TextBlock Text="{Binding Item.RuntimeMinutes, StringFormat={}{0} min}"
                                                FontSize="15" FontWeight="Medium"
                                                Foreground="{StaticResource TextPrimaryBrush}"
@@ -165,7 +165,7 @@
                                     Margin="0,0,8,8"
                                     Visibility="{Binding Item.TotalSeasons, Converter={StaticResource NullToVis}}">
                                 <StackPanel>
-                                    <TextBlock Text="Seasons" Style="{StaticResource CaptionText}"/>
+                                    <TextBlock Text="{Binding [detail.seasons], Source={StaticResource Loc}}" Style="{StaticResource CaptionText}"/>
                                     <TextBlock Text="{Binding Item.TotalSeasons}"
                                                FontSize="15" FontWeight="Medium"
                                                Foreground="{StaticResource TextPrimaryBrush}"
@@ -181,7 +181,7 @@
                                     Margin="0,0,8,8"
                                     Visibility="{Binding Item.TotalEpisodes, Converter={StaticResource NullToVis}}">
                                 <StackPanel>
-                                    <TextBlock Text="Episodes" Style="{StaticResource CaptionText}"/>
+                                    <TextBlock Text="{Binding [detail.episodes], Source={StaticResource Loc}}" Style="{StaticResource CaptionText}"/>
                                     <TextBlock Text="{Binding Item.TotalEpisodes}"
                                                FontSize="15" FontWeight="Medium"
                                                Foreground="{StaticResource TextPrimaryBrush}"
@@ -209,7 +209,7 @@
                         Margin="0,0,0,16"
                         Visibility="{Binding Item.Synopsis, Converter={StaticResource NullToVis}}">
                     <StackPanel>
-                        <TextBlock Text="Synopsis"
+                        <TextBlock Text="{Binding [detail.synopsis], Source={StaticResource Loc}}"
                                    FontSize="14" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
                         <TextBlock Text="{Binding Item.Synopsis}"
@@ -228,7 +228,7 @@
                         Margin="0,0,0,16"
                         Visibility="{Binding Item.UserReview, Converter={StaticResource NullToVis}}">
                     <StackPanel>
-                        <TextBlock Text="Your notes"
+                        <TextBlock Text="{Binding [detail.notes], Source={StaticResource Loc}}"
                                    FontSize="14" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
                         <TextBlock Text="{Binding Item.UserReview}"
@@ -299,15 +299,15 @@
                     </Style.Triggers>
                 </Style>
             </StackPanel.Style>
-            <TextBlock Text="Nothing to show here yet"
+            <TextBlock Text="{Binding [detail.emptyTitle], Source={StaticResource Loc}}"
                        FontSize="16" FontWeight="Medium"
                        Foreground="{StaticResource TextPrimaryBrush}"
                        HorizontalAlignment="Center"/>
-            <TextBlock Text="The selected item could not be loaded."
+            <TextBlock Text="{Binding [detail.emptyMessage], Source={StaticResource Loc}}"
                        Style="{StaticResource CaptionText}"
                        Margin="0,8,0,0"
                        TextAlignment="Center"/>
-            <Button Content="Back to Library"
+            <Button Content="{Binding [detail.backToLibrary], Source={StaticResource Loc}}"
                     Style="{StaticResource AccentButton}"
                     Command="{Binding GoBackCommand}"
                     Margin="0,20,0,0"

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -17,6 +18,7 @@ public partial class MainViewModel : ObservableObject
     private readonly IEnumerable<IMetadataProvider> _providers;
     private readonly ImageCacheService _imageCache;
     private readonly AppSettings _settings;
+    private readonly LocalizationService _localization;
     private readonly AppUpdateService _appUpdateService;
     private readonly Action? _openManualAddOverride;
 
@@ -27,10 +29,18 @@ public partial class MainViewModel : ObservableObject
     private object? _currentView;
 
     [ObservableProperty]
-    private string _currentSection = "Home";
+    private AppSection _currentSection = AppSection.Home;
 
     [ObservableProperty]
-    private string _currentSectionSubtitle = "A calm, curated place for everything you watch and play.";
+    private string _currentSectionTitle = string.Empty;
+
+    [ObservableProperty]
+    private string _currentSectionSubtitle = string.Empty;
+
+    partial void OnCurrentSectionChanged(AppSection value)
+    {
+        UpdateShellState(value);
+    }
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -89,6 +99,7 @@ public partial class MainViewModel : ObservableObject
         IEnumerable<IMetadataProvider> providers,
         ImageCacheService imageCache,
         AppSettings settings,
+        LocalizationService localization,
         AppUpdateService appUpdateService,
         Action? openManualAddOverride = null,
         bool initializeShell = true)
@@ -97,6 +108,7 @@ public partial class MainViewModel : ObservableObject
         _providers = providers;
         _imageCache = imageCache;
         _settings = settings;
+        _localization = localization;
         _appUpdateService = appUpdateService;
         _openManualAddOverride = openManualAddOverride;
 
@@ -107,8 +119,10 @@ public partial class MainViewModel : ObservableObject
             _ = RunInlineSearchAsync();
         };
 
+        PropertyChangedEventManager.AddHandler(_localization, OnLocalizationPropertyChanged, nameof(LocalizationService.CurrentLanguage));
+
         if (initializeShell)
-            NavigateTo("Home");
+            NavigateTo(AppSection.Home);
         else
             UpdateShellState(CurrentSection);
 
@@ -190,7 +204,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch
         {
-            InlineError = "could not import this item.";
+            InlineError = _localization.Get("shell.importFailed");
         }
         finally
         {
@@ -271,7 +285,7 @@ public partial class MainViewModel : ObservableObject
         catch (OperationCanceledException) { }
         catch
         {
-            InlineError = "search failed.";
+            InlineError = _localization.Get("shell.searchFailed");
             InlineResults = [];
             SelectedInlineResult = null;
             ShowInlineEmpty = false;
@@ -330,52 +344,52 @@ public partial class MainViewModel : ObservableObject
     // ── Navigation ───────────────────────────────────────────
 
     [RelayCommand]
-    private void NavigateTo(string section)
+    private void NavigateTo(AppSection section)
     {
         CurrentSection = section;
         UpdateShellState(section);
 
-        if (section == "Home")
+        if (section == AppSection.Home)
         {
             var homeVm = new HomeViewModel(
                 _mediaService,
                 onAddMedia: () => ToggleInlineSearch(),
-                onOpenLibrary: () => NavigateTo("Library"),
-                onOpenSettings: () => NavigateTo("Settings"));
+                onOpenLibrary: () => NavigateTo(AppSection.Library),
+                onOpenSettings: () => NavigateTo(AppSection.Settings));
 
             CurrentView = new HomeView { DataContext = homeVm };
             _ = homeVm.LoadCommand.ExecuteAsync(null);
             return;
         }
 
-        if (section == "Favorites")
+        if (section == AppSection.Favorites)
         {
             var placeholderVm = new PlaceholderViewModel(
-                eyebrow: "COMING SOON",
-                title: "Favorites are on the way",
-                description: "This section will get its own curated space soon. For now, use the library filters to keep track of what matters most.",
-                primaryActionText: "Open Library",
-                secondaryActionText: "Add Something New",
-                onPrimaryAction: () => NavigateTo("Library"),
+                eyebrow: _localization.Get("favorites.eyebrow"),
+                title: _localization.Get("favorites.title"),
+                description: _localization.Get("favorites.description"),
+                primaryActionText: _localization.Get("common.openLibrary"),
+                secondaryActionText: _localization.Get("common.addSomethingNew"),
+                onPrimaryAction: () => NavigateTo(AppSection.Library),
                 onSecondaryAction: () => ToggleInlineSearch());
 
             CurrentView = new PlaceholderView { DataContext = placeholderVm };
             return;
         }
 
-        if (section == "Settings")
+        if (section == AppSection.Settings)
         {
-            var settingsVm = new SettingsViewModel(_settings, _appUpdateService, ApplyUpdateCheckResult);
+            var settingsVm = new SettingsViewModel(_settings, _localization, _appUpdateService, ApplyUpdateCheckResult);
             CurrentView = new SettingsView { DataContext = settingsVm };
             return;
         }
 
         MediaType? typeFilter = section switch
         {
-            "Series" => MediaType.Series,
-            "Anime" => MediaType.Anime,
-            "Movies" => MediaType.Movie,
-            "Games" => MediaType.Game,
+            AppSection.Series => MediaType.Series,
+            AppSection.Anime => MediaType.Anime,
+            AppSection.Movies => MediaType.Movie,
+            AppSection.Games => MediaType.Game,
             _ => null
         };
 
@@ -383,11 +397,11 @@ public partial class MainViewModel : ObservableObject
             _mediaService,
             OpenDetail,
             () => ToggleInlineSearch(),
+            _localization,
             initialDisplayMode: LibraryDisplayMode,
             onDisplayModeChanged: mode => LibraryDisplayMode = mode)
         {
-            TypeFilter = typeFilter,
-            Title = section
+            TypeFilter = typeFilter
         };
 
         if (!string.IsNullOrWhiteSpace(SearchQuery))
@@ -415,8 +429,8 @@ public partial class MainViewModel : ObservableObject
             return;
 
         MessageBox.Show(
-            "The update download could not be opened right now.",
-            "Media Tracker",
+            _localization.Get("shell.updateOpenError"),
+            _localization.Get("app.title"),
             MessageBoxButton.OK,
             MessageBoxImage.Information);
     }
@@ -426,6 +440,7 @@ public partial class MainViewModel : ObservableObject
         var detailVm = new DetailViewModel(
             _mediaService,
             _providers,
+            _localization,
             onBack: () => NavigateTo(CurrentSection),
             onEdit: item => OpenEditDialog(item),
             onDeleted: () => NavigateTo(CurrentSection));
@@ -448,6 +463,7 @@ public partial class MainViewModel : ObservableObject
 
         var vm = new AddEditMediaViewModel(
             _mediaService,
+            _localization,
             onSaved: () => { window.DialogResult = true; window.Close(); },
             onCancelled: () => { window.DialogResult = false; window.Close(); });
 
@@ -463,6 +479,7 @@ public partial class MainViewModel : ObservableObject
 
         var vm = new AddEditMediaViewModel(
             _mediaService,
+            _localization,
             onSaved: () => { window.DialogResult = true; window.Close(); },
             onCancelled: () => { window.DialogResult = false; window.Close(); });
 
@@ -486,23 +503,12 @@ public partial class MainViewModel : ObservableObject
         OpenUpdateDownloadCommand.NotifyCanExecuteChanged();
     }
 
-    private void UpdateShellState(string section)
+    private void UpdateShellState(AppSection section)
     {
-        CanSearch = section is "Library" or "Series" or "Anime" or "Movies" or "Games";
-        CanAddNew = section != "Settings";
-
-        CurrentSectionSubtitle = section switch
-        {
-            "Home" => "A calm, curated place for everything you watch and play.",
-            "Library" => "Browse your entire collection with instant search and status filters.",
-            "Series" => "Keep every season, episode and rewatch session neatly in view.",
-            "Anime" => "Track anime with the same clean flow as the rest of your library.",
-            "Movies" => "A focused shelf for films, ratings and quick revisits.",
-            "Games" => "Log progress, platforms and completion state without clutter.",
-            "Favorites" => "A dedicated space for the media you want to keep closest.",
-            "Settings" => "Configure API keys, update checks and tune the app for your setup.",
-            _ => string.Empty
-        };
+        CanSearch = section is AppSection.Library or AppSection.Series or AppSection.Anime or AppSection.Movies or AppSection.Games;
+        CanAddNew = section != AppSection.Settings;
+        CurrentSectionTitle = _localization.GetSectionLabel(section);
+        CurrentSectionSubtitle = _localization.GetSectionSubtitle(section);
     }
 
     private bool CanOpenUpdateDownload()
@@ -534,5 +540,10 @@ public partial class MainViewModel : ObservableObject
             UpdateBannerMessage = string.Empty;
             UpdateDownloadLocation = null;
         }
+    }
+
+    private void OnLocalizationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        UpdateShellState(CurrentSection);
     }
 }

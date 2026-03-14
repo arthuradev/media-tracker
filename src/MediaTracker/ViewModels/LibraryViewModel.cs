@@ -11,6 +11,7 @@ public partial class LibraryViewModel : ObservableObject
     private readonly MediaService _mediaService;
     private readonly Action<int> _onOpenDetail;
     private readonly Action _onAddNew;
+    private readonly LocalizationService _localization;
     private readonly Action<LibraryDisplayMode>? _onDisplayModeChanged;
     private CancellationTokenSource? _searchDebounceCts;
     private int _loadVersion;
@@ -40,13 +41,13 @@ public partial class LibraryViewModel : ObservableObject
     private string _searchQuery = string.Empty;
 
     [ObservableProperty]
-    private string _title = "Library";
+    private string _title = string.Empty;
 
     [ObservableProperty]
-    private string _emptyTitle = "No media yet";
+    private string _emptyTitle = string.Empty;
 
     [ObservableProperty]
-    private string _emptyMessage = "Add something new to start building your collection.";
+    private string _emptyMessage = string.Empty;
 
     [ObservableProperty]
     private string? _errorMessage;
@@ -61,14 +62,18 @@ public partial class LibraryViewModel : ObservableObject
         MediaService mediaService,
         Action<int> onOpenDetail,
         Action onAddNew,
+        LocalizationService localization,
         LibraryDisplayMode initialDisplayMode = LibraryDisplayMode.Grid,
         Action<LibraryDisplayMode>? onDisplayModeChanged = null)
     {
         _mediaService = mediaService;
         _onOpenDetail = onOpenDetail;
         _onAddNew = onAddNew;
+        _localization = localization;
         _onDisplayModeChanged = onDisplayModeChanged;
         DisplayMode = initialDisplayMode;
+        Title = _localization.Get("nav.library");
+        UpdateEmptyState();
     }
 
     [RelayCommand]
@@ -96,7 +101,7 @@ public partial class LibraryViewModel : ObservableObject
             if (loadVersion != _loadVersion)
                 return;
 
-            ErrorMessage = "The library could not be loaded right now.";
+            ErrorMessage = _localization.Get("library.loadError");
             IsEmpty = Items.Count == 0;
         }
         finally
@@ -158,23 +163,9 @@ public partial class LibraryViewModel : ObservableObject
 
     private void UpdateEmptyState()
     {
-        if (!string.IsNullOrWhiteSpace(SearchQuery) || StatusFilter is not null)
-        {
-            EmptyTitle = "No matches found";
-            EmptyMessage = "Try a broader search or clear one of the status filters.";
-            return;
-        }
-
-        EmptyTitle = Title switch
-        {
-            "Series" => "No series yet",
-            "Anime" => "No anime yet",
-            "Movies" => "No movies yet",
-            "Games" => "No games yet",
-            _ => "No media yet"
-        };
-
-        EmptyMessage = "Add something new to start building your collection.";
+        bool hasSearchOrStatusFilter = !string.IsNullOrWhiteSpace(SearchQuery) || StatusFilter is not null;
+        EmptyTitle = _localization.GetLibraryEmptyTitle(TypeFilter, hasSearchOrStatusFilter);
+        EmptyMessage = _localization.GetLibraryEmptyMessage(hasSearchOrStatusFilter);
     }
 
     private async Task DebounceSearchAsync()

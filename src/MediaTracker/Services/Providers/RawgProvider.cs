@@ -13,18 +13,20 @@ public class RawgProvider : IMetadataProvider
 
     private readonly ResilientHttpService _http;
     private readonly AppSettings _settings;
+    private readonly LocalizationService _localization;
     private readonly ILogger<RawgProvider> _logger;
 
     public string Name => "RAWG";
     public bool IsConfigured => !string.IsNullOrWhiteSpace(ApiKey);
-    public string ConfigurationHint => "Add a RAWG API key in Settings to search games.";
+    public string ConfigurationHint => _localization.Get("provider.rawg.configHint");
     public MediaType[] SupportedTypes => [MediaType.Game];
     private string ApiKey => _settings.RawgApiKey?.Trim() ?? string.Empty;
 
-    public RawgProvider(ResilientHttpService http, AppSettings settings, ILogger<RawgProvider> logger)
+    public RawgProvider(ResilientHttpService http, AppSettings settings, LocalizationService localization, ILogger<RawgProvider> logger)
     {
         _http = http;
         _settings = settings;
+        _localization = localization;
         _logger = logger;
     }
 

@@ -11,6 +11,7 @@ public partial class EpisodesViewModel : ObservableObject
 {
     private readonly MediaService _mediaService;
     private readonly IEnumerable<IMetadataProvider> _providers;
+    private readonly LocalizationService _localization;
     private readonly int _mediaItemId;
     private readonly string? _externalId;
     private readonly string? _providerName;
@@ -29,13 +30,13 @@ public partial class EpisodesViewModel : ObservableObject
     private bool _hasEpisodes;
 
     [ObservableProperty]
-    private string _progressSummary = "";
+    private string _progressSummary = string.Empty;
 
     [ObservableProperty]
     private bool _showLoadingSkeleton;
 
     [ObservableProperty]
-    private string _emptyStateMessage = "Episode data has not been loaded yet.";
+    private string _emptyStateMessage = string.Empty;
 
     [ObservableProperty]
     private string? _errorMessage;
@@ -43,6 +44,7 @@ public partial class EpisodesViewModel : ObservableObject
     public EpisodesViewModel(
         MediaService mediaService,
         IEnumerable<IMetadataProvider> providers,
+        LocalizationService localization,
         int mediaItemId,
         string? externalId,
         string? providerName,
@@ -50,11 +52,13 @@ public partial class EpisodesViewModel : ObservableObject
     {
         _mediaService = mediaService;
         _providers = providers;
+        _localization = localization;
         _mediaItemId = mediaItemId;
         _externalId = externalId;
         _providerName = providerName;
         _totalSeasons = totalSeasons;
         CanFetch = !string.IsNullOrEmpty(externalId) && !string.IsNullOrEmpty(providerName);
+        EmptyStateMessage = _localization.Get("episodes.empty.unavailable");
     }
 
     [RelayCommand]
@@ -82,12 +86,12 @@ public partial class EpisodesViewModel : ObservableObject
             HasEpisodes = Seasons.Count > 0;
             UpdateProgressSummary();
             EmptyStateMessage = CanFetch
-                ? "Episode data has not been loaded yet. Fetch the season list to start tracking progress."
-                : "Episode data is not available for this item yet.";
+                ? _localization.Get("episodes.empty.fetchable")
+                : _localization.Get("episodes.empty.unavailable");
         }
         catch (Exception)
         {
-            ErrorMessage = "Episode data could not be loaded right now.";
+            ErrorMessage = _localization.Get("episodes.loadError");
         }
         finally
         {
@@ -112,7 +116,7 @@ public partial class EpisodesViewModel : ObservableObject
         }
         catch (Exception)
         {
-            ErrorMessage = "Episode progress could not be updated.";
+            ErrorMessage = _localization.Get("episodes.updateError");
         }
     }
 
@@ -134,7 +138,7 @@ public partial class EpisodesViewModel : ObservableObject
         }
         catch (Exception)
         {
-            ErrorMessage = "Season progress could not be updated.";
+            ErrorMessage = _localization.Get("episodes.seasonError");
         }
     }
 
@@ -154,7 +158,7 @@ public partial class EpisodesViewModel : ObservableObject
         }
         catch (Exception)
         {
-            ErrorMessage = "Episode data could not be fetched right now.";
+            ErrorMessage = _localization.Get("episodes.fetchError");
         }
         finally
         {
@@ -186,7 +190,7 @@ public partial class EpisodesViewModel : ObservableObject
         }
         catch (Exception)
         {
-            ErrorMessage = "Episode data could not be fetched right now.";
+            ErrorMessage = _localization.Get("episodes.fetchError");
         }
         finally
         {
@@ -198,7 +202,7 @@ public partial class EpisodesViewModel : ObservableObject
     {
         var total = Seasons.Sum(s => s.TotalCount);
         var watched = Seasons.Sum(s => s.WatchedCount);
-        ProgressSummary = total > 0 ? $"{watched}/{total} episodes watched" : "";
+        ProgressSummary = total > 0 ? _localization.Format("progress.episodesSummary", watched, total) : string.Empty;
     }
 
     private IMetadataProvider? GetProvider()
@@ -209,7 +213,7 @@ public partial class EpisodesViewModel : ObservableObject
         var provider = _providers.FirstOrDefault(p => p.Name == _providerName);
         if (provider is null)
         {
-            ErrorMessage = "Episode data provider is not available for this item.";
+            ErrorMessage = _localization.Get("episodes.providerMissing");
             return null;
         }
 

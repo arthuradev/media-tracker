@@ -1,14 +1,16 @@
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using MediaTracker.Helpers;
+using MediaTracker.Models;
 
 namespace MediaTracker.Services;
 
 public class AppSettings
 {
-    private const int CurrentFormatVersion = 2;
+    private const int CurrentFormatVersion = 3;
     private static readonly JsonSerializerOptions ReadOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -22,9 +24,11 @@ public class AppSettings
     public string RawgApiKey { get; set; } = string.Empty;
     public string UpdateFeedUrl { get; set; } = string.Empty;
     public bool CheckForUpdatesOnStartup { get; set; } = true;
+    public AppLanguage PreferredLanguage { get; set; } = AppLanguageCatalog.InferFromCulture(CultureInfo.CurrentUICulture);
     public bool HasUnreadableSecrets { get; private set; }
+    public string? StoragePath { get; private set; }
 
-    public static AppSettings Load(string? path = null)
+    public static AppSettings Load(string? path = null, CultureInfo? currentCulture = null)
     {
         try
         {
@@ -34,17 +38,21 @@ public class AppSettings
                 var json = File.ReadAllText(settingsPath);
                 var persisted = JsonSerializer.Deserialize<PersistedAppSettings>(json, ReadOptions);
                 if (persisted is not null)
-                    return FromPersisted(persisted);
+                    return FromPersisted(persisted, settingsPath, currentCulture);
             }
         }
         catch { }
 
-        return new AppSettings();
+        return new AppSettings
+        {
+            PreferredLanguage = AppLanguageCatalog.InferFromCulture(currentCulture ?? CultureInfo.CurrentUICulture),
+            StoragePath = ResolvePath(path)
+        };
     }
 
     public void Save(string? path = null)
     {
-        string settingsPath = ResolvePath(path);
+        string settingsPath = ResolvePath(path ?? StoragePath);
         string directory = Path.GetDirectoryName(settingsPath) ?? AppPaths.AppDataDir;
 
         Directory.CreateDirectory(directory);
@@ -55,17 +63,20 @@ public class AppSettings
             TmdbApiKeyProtected = ProtectSecret(TmdbApiKey),
             RawgApiKeyProtected = ProtectSecret(RawgApiKey),
             UpdateFeedUrl = UpdateFeedUrl,
-            CheckForUpdatesOnStartup = CheckForUpdatesOnStartup
+            CheckForUpdatesOnStartup = CheckForUpdatesOnStartup,
+            PreferredLanguage = AppLanguageCatalog.GetCultureCode(PreferredLanguage)
         };
 
         var json = JsonSerializer.Serialize(persisted, WriteOptions);
         File.WriteAllText(settingsPath, json);
         HasUnreadableSecrets = false;
+        StoragePath = settingsPath;
     }
 
-    private static AppSettings FromPersisted(PersistedAppSettings persisted)
+    private static AppSettings FromPersisted(PersistedAppSettings persisted, string settingsPath, CultureInfo? currentCulture)
     {
         bool hasUnreadableSecrets = false;
+        AppLanguage preferredLanguage = ResolvePreferredLanguage(persisted.PreferredLanguage, currentCulture);
 
         var settings = new AppSettings
         {
@@ -73,7 +84,9 @@ public class AppSettings
             RawgApiKey = ReadSecret(persisted.RawgApiKeyProtected, persisted.RawgApiKey, ref hasUnreadableSecrets),
             UpdateFeedUrl = persisted.UpdateFeedUrl ?? string.Empty,
             CheckForUpdatesOnStartup = persisted.CheckForUpdatesOnStartup,
-            HasUnreadableSecrets = hasUnreadableSecrets
+            PreferredLanguage = preferredLanguage,
+            HasUnreadableSecrets = hasUnreadableSecrets,
+            StoragePath = settingsPath
         };
 
         return settings;
@@ -130,6 +143,14 @@ public class AppSettings
         return false;
     }
 
+    private static AppLanguage ResolvePreferredLanguage(string? persistedValue, CultureInfo? currentCulture)
+    {
+        if (AppLanguageCatalog.TryParse(persistedValue, out AppLanguage language))
+            return language;
+
+        return AppLanguageCatalog.InferFromCulture(currentCulture ?? CultureInfo.CurrentUICulture);
+    }
+
     private sealed class PersistedAppSettings
     {
         public int Version { get; set; } = CurrentFormatVersion;
@@ -139,5 +160,6 @@ public class AppSettings
         public string? RawgApiKeyProtected { get; set; }
         public string UpdateFeedUrl { get; set; } = string.Empty;
         public bool CheckForUpdatesOnStartup { get; set; } = true;
+        public string? PreferredLanguage { get; set; }
     }
 }

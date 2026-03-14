@@ -44,6 +44,7 @@ public partial class App : Application
             var services = new ServiceCollection();
             ConfigureServices(services);
             _serviceProvider = services.BuildServiceProvider();
+            Resources["Loc"] = _serviceProvider.GetRequiredService<LocalizationService>();
 
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -73,6 +74,7 @@ public partial class App : Application
         // Settings
         var settings = AppSettings.Load();
         services.AddSingleton(settings);
+        services.AddSingleton<LocalizationService>();
 
         // HTTP client
         services.AddMemoryCache();
@@ -97,11 +99,13 @@ public partial class App : Application
             new TmdbProvider(
                 sp.GetRequiredService<ResilientHttpService>(),
                 sp.GetRequiredService<AppSettings>(),
+                sp.GetRequiredService<LocalizationService>(),
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<TmdbProvider>>()));
         services.AddSingleton<IMetadataProvider>(sp =>
             new RawgProvider(
                 sp.GetRequiredService<ResilientHttpService>(),
                 sp.GetRequiredService<AppSettings>(),
+                sp.GetRequiredService<LocalizationService>(),
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<RawgProvider>>()));
 
         services.AddSingleton<MainViewModel>();

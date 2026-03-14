@@ -117,7 +117,9 @@ public sealed class RobustnessTests
     [Fact]
     public void MediaInputValidatorRejectsEmptyTitle()
     {
+        var localization = TestServices.CreateLocalizationService();
         var error = MediaInputValidator.ValidateMedia(
+            localization,
             title: "   ",
             releaseYear: 2025,
             userScore: 8,
@@ -131,7 +133,9 @@ public sealed class RobustnessTests
     [Fact]
     public void MediaInputValidatorRejectsInvalidMediaRanges()
     {
+        var localization = TestServices.CreateLocalizationService();
         var yearError = MediaInputValidator.ValidateMedia(
+            localization,
             title: "Valid",
             releaseYear: 1700,
             userScore: 8,
@@ -140,6 +144,7 @@ public sealed class RobustnessTests
             runtimeMinutes: 45);
 
         var ratingError = MediaInputValidator.ValidateMedia(
+            localization,
             title: "Valid",
             releaseYear: 2025,
             userScore: 11,
@@ -148,6 +153,7 @@ public sealed class RobustnessTests
             runtimeMinutes: 45);
 
         var runtimeError = MediaInputValidator.ValidateMedia(
+            localization,
             title: "Valid",
             releaseYear: 2025,
             userScore: 8,
@@ -163,7 +169,8 @@ public sealed class RobustnessTests
     [Fact]
     public void MediaInputValidatorRejectsNegativeGameHours()
     {
-        var error = MediaInputValidator.ValidateGameProgress(-3);
+        var localization = TestServices.CreateLocalizationService();
+        var error = MediaInputValidator.ValidateGameProgress(localization, -3);
         Assert.Equal("Hours played cannot be negative.", error);
     }
 
@@ -171,6 +178,7 @@ public sealed class RobustnessTests
     public async Task DetailViewModelClearsStaleStateWhenItemMissing()
     {
         await using var harness = await TestHarness.CreateAsync();
+        var localization = TestServices.CreateLocalizationService();
         var item = await harness.MediaService.CreateAsync(new MediaItem
         {
             Title = "Detail Reset Test",
@@ -181,6 +189,7 @@ public sealed class RobustnessTests
         var vm = new DetailViewModel(
             harness.MediaService,
             Array.Empty<IMetadataProvider>(),
+            localization,
             () => { },
             _ => { },
             () => { });
@@ -205,9 +214,11 @@ public sealed class RobustnessTests
     public async Task EpisodesViewModelReportsMissingProvider()
     {
         await using var harness = await TestHarness.CreateAsync();
+        var localization = TestServices.CreateLocalizationService();
         var vm = new EpisodesViewModel(
             harness.MediaService,
             Array.Empty<IMetadataProvider>(),
+            localization,
             mediaItemId: 1,
             externalId: "abc123",
             providerName: "MissingProvider",
@@ -221,11 +232,13 @@ public sealed class RobustnessTests
     [Fact]
     public void LibraryViewModelTogglesDisplayModes()
     {
+        var localization = TestServices.CreateLocalizationService();
         LibraryDisplayMode lastMode = LibraryDisplayMode.Grid;
         var vm = new LibraryViewModel(
             new FakeMediaService(),
             _ => { },
             () => { },
+            localization,
             initialDisplayMode: LibraryDisplayMode.List,
             onDisplayModeChanged: mode => lastMode = mode);
 
@@ -313,7 +326,8 @@ public sealed class RobustnessTests
         using var cache = new MemoryCache(new MemoryCacheOptions());
         var http = new ResilientHttpService(client, cache, new FakeLogger<ResilientHttpService>());
         var settings = new AppSettings();
-        var provider = new RawgProvider(http, settings, new FakeLogger<RawgProvider>());
+        var localization = TestServices.CreateLocalizationService(settings);
+        var provider = new RawgProvider(http, settings, localization, new FakeLogger<RawgProvider>());
 
         Assert.False(provider.IsConfigured);
 

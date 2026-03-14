@@ -39,7 +39,7 @@
                 <TextBlock Text="{Binding WindowTitle}"
                            Style="{StaticResource PageTitleText}"
                            FontSize="{StaticResource FontSizeLarge}"/>
-                <TextBlock Text="Keep the details clean now so the library stays easy to browse later."
+                <TextBlock Text="{Binding [addEdit.tagline], Source={StaticResource Loc}}"
                            Style="{StaticResource BodyText}"
                            Margin="0,8,0,0"
                            TextWrapping="Wrap"/>
@@ -59,11 +59,11 @@
             <StackPanel>
                 <Border Style="{StaticResource SurfaceCard}" Padding="22">
                     <StackPanel>
-                        <TextBlock Text="Title *" Style="{StaticResource FormLabel}" Margin="0,0,0,6"/>
+                        <TextBlock Text="{Binding [addEdit.title], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}" Margin="0,0,0,6"/>
                         <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputTextBox}"/>
 
-                        <TextBlock Text="Original title" Style="{StaticResource FormLabel}"/>
+                        <TextBlock Text="{Binding [addEdit.originalTitle], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}"/>
                         <TextBox Text="{Binding OriginalTitle, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputTextBox}"/>
 
@@ -75,7 +75,7 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Media type" Style="{StaticResource FormLabel}"/>
+                                <TextBlock Text="{Binding [addEdit.mediaType], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}"/>
                                 <ComboBox ItemsSource="{Binding MediaTypes}"
                                           SelectedItem="{Binding MediaType}"
                                           Style="{StaticResource InputComboBox}">
@@ -88,7 +88,7 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Status" Style="{StaticResource FormLabel}"/>
+                                <TextBlock Text="{Binding [addEdit.status], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}"/>
                                 <ComboBox ItemsSource="{Binding MediaStatuses}"
                                           SelectedItem="{Binding Status}"
                                           Style="{StaticResource InputComboBox}">
@@ -109,13 +109,13 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Release year" Style="{StaticResource FormLabel}"/>
+                                <TextBlock Text="{Binding [addEdit.releaseYear], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}"/>
                                 <TextBox Text="{Binding ReleaseYear, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource InputTextBox}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Your rating" Style="{StaticResource FormLabel}"/>
+                                <TextBlock Text="{Binding [addEdit.rating], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}"/>
                                 <TextBox Text="{Binding UserScore, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource InputTextBox}"/>
                             </StackPanel>
@@ -131,25 +131,25 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Seasons" Style="{StaticResource FormLabel}"/>
+                                <TextBlock Text="{Binding [addEdit.seasons], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}"/>
                                 <TextBox Text="{Binding TotalSeasons, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource InputTextBox}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Episodes" Style="{StaticResource FormLabel}"/>
+                                <TextBlock Text="{Binding [addEdit.episodes], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}"/>
                                 <TextBox Text="{Binding TotalEpisodes, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource InputTextBox}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="4">
-                                <TextBlock Text="Runtime (min)" Style="{StaticResource FormLabel}"/>
+                                <TextBlock Text="{Binding [addEdit.runtime], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}"/>
                                 <TextBox Text="{Binding RuntimeMinutes, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource InputTextBox}"/>
                             </StackPanel>
                         </Grid>
 
-                        <TextBlock Text="Genres" Style="{StaticResource FormLabel}"/>
+                        <TextBlock Text="{Binding [addEdit.genres], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}"/>
                         <TextBox Text="{Binding Genres, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputTextBox}"/>
                     </StackPanel>
@@ -157,7 +157,7 @@
 
                 <Border Style="{StaticResource SurfaceCard}" Padding="22" Margin="0,18,0,0">
                     <StackPanel>
-                        <TextBlock Text="Synopsis" Style="{StaticResource FormLabel}" Margin="0,0,0,6"/>
+                        <TextBlock Text="{Binding [addEdit.synopsis], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}" Margin="0,0,0,6"/>
                         <TextBox Text="{Binding Synopsis, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputTextBox}"
                                  TextWrapping="Wrap"
@@ -165,7 +165,7 @@
                                  Height="120"
                                  VerticalContentAlignment="Top"/>
 
-                        <TextBlock Text="Your review" Style="{StaticResource FormLabel}"/>
+                        <TextBlock Text="{Binding [addEdit.review], Source={StaticResource Loc}}" Style="{StaticResource FormLabel}"/>
                         <TextBox Text="{Binding UserReview, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource InputTextBox}"
                                  TextWrapping="Wrap"
@@ -183,11 +183,11 @@
                 BorderThickness="0,1,0,0"
                 Padding="24,16">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Cancel"
+                <Button Content="{Binding [common.cancel], Source={StaticResource Loc}}"
                         Command="{Binding CancelCommand}"
                         Style="{StaticResource SecondaryButton}"
                         Margin="0,0,12,0"/>
-                <Button Content="Save"
+                <Button Content="{Binding [common.save], Source={StaticResource Loc}}"
                         Command="{Binding SaveCommand}"
                         Style="{StaticResource AccentButton}"/>
             </StackPanel>

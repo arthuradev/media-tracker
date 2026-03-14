@@ -1,6 +1,9 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MediaTracker.Helpers;
+using MediaTracker.Models;
 using MediaTracker.Services;
 
 namespace MediaTracker.ViewModels;
@@ -8,8 +11,12 @@ namespace MediaTracker.ViewModels;
 public partial class SettingsViewModel : ObservableObject
 {
     private readonly AppSettings _settings;
+    private readonly LocalizationService _localization;
     private readonly AppUpdateService _appUpdateService;
     private readonly Action<AppUpdateCheckResult>? _onUpdateCheckCompleted;
+
+    [ObservableProperty]
+    private SettingsTab _selectedTab = SettingsTab.General;
 
     [ObservableProperty]
     private string _tmdbApiKey;
@@ -24,10 +31,20 @@ public partial class SettingsViewModel : ObservableObject
     private bool _checkForUpdatesOnStartup;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ApplyLanguageCommand))]
+    private AppLanguage _selectedLanguage;
+
+    [ObservableProperty]
     private string? _statusMessage;
 
     [ObservableProperty]
     private string? _errorMessage;
+
+    [ObservableProperty]
+    private string? _languageStatusMessage;
+
+    [ObservableProperty]
+    private string? _languageErrorMessage;
 
     [ObservableProperty]
     private string? _updateStatusMessage;
@@ -42,24 +59,66 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string? _latestDownloadLocation;
 
+    public ObservableCollection<LocalizedOption<AppLanguage>> LanguageOptions { get; }
+
     public string CurrentVersion { get; }
+
+    public string CurrentLanguageDisplayName => _localization.GetLanguageDisplayName(_localization.CurrentLanguage);
 
     public SettingsViewModel(
         AppSettings settings,
+        LocalizationService localization,
         AppUpdateService appUpdateService,
         Action<AppUpdateCheckResult>? onUpdateCheckCompleted = null)
     {
         _settings = settings;
+        _localization = localization;
         _appUpdateService = appUpdateService;
         _onUpdateCheckCompleted = onUpdateCheckCompleted;
+
         _tmdbApiKey = settings.TmdbApiKey;
         _rawgApiKey = settings.RawgApiKey;
         _updateFeedUrl = settings.UpdateFeedUrl;
         _checkForUpdatesOnStartup = settings.CheckForUpdatesOnStartup;
+        _selectedLanguage = settings.PreferredLanguage;
         CurrentVersion = appUpdateService.CurrentVersion;
+        LanguageOptions = new ObservableCollection<LocalizedOption<AppLanguage>>(
+            AppLanguageCatalog.SupportedLanguages.Select(language => new LocalizedOption<AppLanguage>
+            {
+                Value = language,
+                Label = _localization.GetLanguageDisplayName(language)
+            }));
+
+        PropertyChangedEventManager.AddHandler(_localization, OnLocalizationPropertyChanged, nameof(LocalizationService.CurrentLanguage));
 
         if (settings.HasUnreadableSecrets)
-            ErrorMessage = "Some saved API keys could not be read. Add them again and save to protect them.";
+            ErrorMessage = _localization.Get("settings.unreadableSecrets");
+    }
+
+    [RelayCommand]
+    private void SelectTab(SettingsTab tab)
+    {
+        SelectedTab = tab;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanApplyLanguage))]
+    private void ApplyLanguage()
+    {
+        LanguageStatusMessage = null;
+        LanguageErrorMessage = null;
+
+        try
+        {
+            _localization.SetLanguage(SelectedLanguage);
+            _settings.Save();
+            LanguageStatusMessage = _localization.Get("settings.general.applied");
+            OnPropertyChanged(nameof(CurrentLanguageDisplayName));
+            ApplyLanguageCommand.NotifyCanExecuteChanged();
+        }
+        catch (Exception)
+        {
+            LanguageErrorMessage = _localization.Get("settings.saveError");
+        }
     }
 
     [RelayCommand]
@@ -75,11 +134,11 @@ public partial class SettingsViewModel : ObservableObject
             _settings.UpdateFeedUrl = UpdateFeedUrl.Trim();
             _settings.CheckForUpdatesOnStartup = CheckForUpdatesOnStartup;
             _settings.Save();
-            StatusMessage = "Settings saved.";
+            StatusMessage = _localization.Get("settings.saved");
         }
         catch (Exception)
         {
-            ErrorMessage = "Could not save settings right now.";
+            ErrorMessage = _localization.Get("settings.saveError");
         }
     }
 
@@ -124,12 +183,17 @@ public partial class SettingsViewModel : ObservableObject
         if (ShellLauncher.TryOpen(LatestDownloadLocation))
             return;
 
-        UpdateErrorMessage = "The update download could not be opened right now.";
+        UpdateErrorMessage = _localization.Get("settings.downloadOpenError");
     }
 
     partial void OnLatestDownloadLocationChanged(string? value)
     {
         OpenLatestDownloadCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool CanApplyLanguage()
+    {
+        return SelectedLanguage != _localization.CurrentLanguage;
     }
 
     private bool CanCheckForUpdates()
@@ -140,5 +204,13 @@ public partial class SettingsViewModel : ObservableObject
     private bool CanOpenLatestDownload()
     {
         return !string.IsNullOrWhiteSpace(LatestDownloadLocation);
+    }
+
+    private void OnLocalizationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(CurrentLanguageDisplayName));
+
+        if (_settings.HasUnreadableSecrets)
+            ErrorMessage = _localization.Get("settings.unreadableSecrets");
     }
 }
